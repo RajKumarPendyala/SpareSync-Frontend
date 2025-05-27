@@ -1,4 +1,4 @@
-package com.sparesync
+package com.PartNest
 
 import android.app.Application
 import com.facebook.react.PackageList
