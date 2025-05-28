@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import { IP_ADDRESS } from '@env';
 import axios from 'axios';
@@ -16,7 +17,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import isValidEmail from '../../utils/isValidEmail';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
-import Colors from '../../contexts/colors';
+import Colors from '../../context/colors';
 
 const { width } = Dimensions.get('window');
 
@@ -37,6 +38,8 @@ const LoginScreen: React.FC<Props> = ({navigation}) => {
 
   const handleLogin = async () => {
 
+console.log('LoginScreen - handleLogin');
+
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
@@ -51,7 +54,6 @@ const LoginScreen: React.FC<Props> = ({navigation}) => {
     setError('');
 
     try {
-      console.log('inside try');
       const response = await axios.post(
           `http://${IP_ADDRESS}:3000/api/users/login`,
           { email, password },
@@ -90,7 +92,7 @@ const LoginScreen: React.FC<Props> = ({navigation}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Image
         source={partnest_logo}
         style={styles.logo}
@@ -151,13 +153,13 @@ const LoginScreen: React.FC<Props> = ({navigation}) => {
       <TouchableOpacity onPress={()=> navigation.navigate('Personas')}>
           <Text style={styles.registerText}>Don't have an account ?</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: 'center',
     paddingTop: 60,
     backgroundColor: Colors.background,

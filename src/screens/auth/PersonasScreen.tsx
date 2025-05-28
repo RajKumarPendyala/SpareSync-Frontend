@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../../navigation/StackNavigator';
-import Colors from '../../contexts/colors';
+import Colors from '../../context/colors';
 
 const { width } = Dimensions.get('window');
 

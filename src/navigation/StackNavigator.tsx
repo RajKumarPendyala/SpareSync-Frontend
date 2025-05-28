@@ -9,7 +9,8 @@ import TermsAndConditionsScreen from '../screens/auth/TermsAndConditionsScreen';
 import SparePartsScreen from '../screens/common/SparePartsScreen';
 import ProfileScreen from '../screens/common/ProfileScreen';
 import WalletScreen from '../screens/common/WalletScreen';
-import Colors from '../contexts/colors';
+import ChangePasswordScreen from '../screens/common/ChangePasswordScreen';
+import Colors from '../context/colors';
 import BuyerTabNav from './BuyerTabNav';
 import SellerTabNav from './SellerTabNav';
 import AdminTabNav from './AdminTabNav';
@@ -25,9 +26,10 @@ export type StackParamList = {
     AdminTabNav: undefined;
     Terms: undefined;
     PasswordReset: { email: string};
-    SpareParts: {gadgetType: string};
+    SpareParts: {gadgetType: string, name: string};
     Wallet: undefined;
     Profile: undefined;
+    ChangePassword: undefined;
 };
 
 const Stack = createStackNavigator<StackParamList>();
@@ -53,11 +55,18 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="Personas" component={PersonasScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Terms" component={TermsAndConditionsScreen} options={{ headerShown: false }} />
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
             <Stack.Screen name="PasswordReset" component={PasswordResetScreen} options={{ headerShown: false }}/>
             <Stack.Screen name="BuyerTabNav" component={BuyerTabNav} options={{ headerShown: false }}  />
             <Stack.Screen name="AdminTabNav" component={AdminTabNav} options={{ headerShown: false }}  />
             <Stack.Screen name="SellerTabNav" component={SellerTabNav} options={{ headerShown: false }} />
-            <Stack.Screen name="SpareParts" component={SparePartsScreen} />
+            <Stack.Screen name="SpareParts"
+                component={SparePartsScreen}
+                options={({ route }) => ({
+                    headerShown: true,
+                    title: route.params?.name ?? 'Seller Dashboard',
+                })}
+            />
             <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="Wallet" component={WalletScreen} />
         </Stack.Navigator>

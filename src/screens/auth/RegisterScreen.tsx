@@ -21,7 +21,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
-import Colors from '../../contexts/colors';
+import Colors from '../../context/colors';
 import axios from 'axios';
 
 
@@ -141,6 +141,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const modal = async () => {
     if (isEmailVerified) {return;}
+
     if (!isValidEmail(email)) {
       Alert.alert('Error', 'Invalid email address');
       return;
@@ -176,6 +177,10 @@ const RegisterScreen: React.FC<Props> = ({ navigation, route }) => {
 
 
   const handleResendOtp = async () => {
+
+console.log('RegisterScreen - handleSignup');
+
+    setLoading(true);
     // if (!isResendEnabled) {return;}
     try {
       await axios.post(
@@ -195,11 +200,14 @@ const RegisterScreen: React.FC<Props> = ({ navigation, route }) => {
       } else {
         Alert.alert('Error', 'Something went wrong. Please try again.');
       }
+    } finally{
+      setLoading(false);
     }
   };
 
 
   const verification = async () => {
+    setLoading(true);
     try {
       const res = await axios.post(
         `http://${IP_ADDRESS}:3000/api/users/verify-email`,
@@ -224,6 +232,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation, route }) => {
         Alert.alert('Error', 'Something went wrong. Please try again.');
       }
       setModalVisible(false);
+    } finally{
+      setLoading(false);
     }
   };
 
@@ -303,16 +313,19 @@ const RegisterScreen: React.FC<Props> = ({ navigation, route }) => {
             </View>
 
             <TouchableOpacity disabled={!isResendEnabled} onPress={handleResendOtp} style={styles.timer}>
-              <Text style={[styles.timerText, { color: isResendEnabled ? Colors.primary : Colors.secondary }]}>
-                {isResendEnabled ? 'Resend OTP' : formatTime(timer)}
-              </Text>
+              {
+                loading ? ( <ActivityIndicator size="small" color={Colors.background} /> ) :
+                <Text style={[styles.timerText, { color: isResendEnabled ? Colors.primary : Colors.secondary }]}>
+                  {isResendEnabled ? 'Resend OTP' : formatTime(timer)}
+                </Text>
+              }
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.closeButton}
               onPress={verification}
               disabled={loading}>
               {
-                loading ? ( <ActivityIndicator size="small" color={Colors.background} /> ) :
+                (loading && !isEmailVerified) ? ( <ActivityIndicator size="small" color={Colors.background} /> ) :
                 ( <Text style={styles.closeText}>
                     {isEmailVerified ? 'Verified' : 'Verify'}
                   </Text> )
@@ -371,7 +384,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation, route }) => {
 
       <TouchableOpacity style={styles.signupButton} onPress={handleSignup} disabled={loading}>
         {
-          loading ? ( <ActivityIndicator size="small" color={Colors.background} /> ) :
+          (loading && isEmailVerified) ? ( <ActivityIndicator size="small" color={Colors.background} /> ) :
           ( <Text style={styles.signupText}>Signup</Text> )
         }
       </TouchableOpacity>

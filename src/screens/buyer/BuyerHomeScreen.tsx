@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,13 +8,19 @@ import {
   Dimensions,
   Modal,
   Image,
+  Alert,
+  Pressable,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Colors from '../../contexts/colors';
+import { IP_ADDRESS } from '@env';
+import axios from 'axios';
+import { useSpareParts } from '../../context/SparePartsContext';
+import Colors from '../../context/colors';
+
 const image2 = require('../../assets/icons/partnest_logo.png');
 
 type RootStackNavigationProp = StackNavigationProp<StackParamList, 'BuyerTabNav'>;
@@ -30,28 +36,92 @@ const categories = [
   { id: '6', name: 'Gaming Consoles', icon: 'gamepad-variant', value: 'GamingConsoles'},
 ];
 
-const items = [
-  { id: '1',  name: 'Daliah Drop Shoulder', price: 32.00, rating: 4.3},
-  { id: '2',  name: 'Daliah Drop Shoulder', price: 32.00, rating: 4.3},
-  { id: '3',  name: 'Daliah Drop Shoulder', price: 32.00, rating: 4.3},
-  { id: '4',  name: 'Daliah Drop Shoulder', price: 32.00, rating: 4.3},
-  { id: '5',  name: 'Daliah Drop Shoulder', price: 32.00, rating: 4.3},
-];
-
 const BuyerHomeScreen: React.FC = () => {
   const navigation = useNavigation<RootStackNavigationProp>();
   const [showMenu, setShowMenu] = useState(false);
+  const { spareParts, setSpareParts } = useSpareParts(); // use context
 
-  const handleCategoryPress = (item: any) => {
-    navigation.navigate('SpareParts', { gadgetType: item.value });
-  };
+
+  useEffect(() => {
+    const fetchSpareParts = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        const response = await axios.get(
+          `http://${IP_ADDRESS}:3000/api/users/products/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+console.log('daata',response);
+
+        setSpareParts(response.data.SpareParts || []);
+      } catch (error) {
+        console.error('Error fetching spare parts:', error);
+      }
+    };
+
+    fetchSpareParts();
+  }, []);
+
+
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('token');
-    await AsyncStorage.removeItem('role');
-    setShowMenu(false);
-    navigation.replace('Login');
+    Alert.alert(
+      'Confirm Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          onPress: async () => {
+            await AsyncStorage.removeItem('token');
+            await AsyncStorage.removeItem('role');
+            setShowMenu(false);
+            navigation.replace('Login');
+          },
+          style: 'destructive',
+        },
+      ],
+      { cancelable: true }
+    );
   };
+
+  const handleAddCart = async (item: any) => {
+    try {
+
+console.log('BuyerScreen.handleAddCart');
+
+      const token = await AsyncStorage.getItem('token');
+      const response = await axios.post(
+        `http://${IP_ADDRESS}:3000/api/users/cart/items/`,
+        { sparePartId: item._id },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.message) {
+        Alert.alert('Item added to cart successfully!');
+      }
+    } catch (error: any) {
+      console.error('Error adding to cart:', error?.response?.data || error.message);
+      Alert.alert('Failed to add item to cart.');
+    }
+  };
+
+  const handleCategoryPress = (item: any) => {
+    navigation.navigate('SpareParts', { gadgetType: item.value, name: item.name});
+  };
+
 
   return (
     <View style={styles.container}>
@@ -59,16 +129,17 @@ const BuyerHomeScreen: React.FC = () => {
       <View style={styles.header}>
         <Text style={styles.logo}>SpareSync</Text>
         <TouchableOpacity style={styles.menuButton} onPress={() => setShowMenu(true)}>
-          <Icon name="account-circle" size={30} color={Colors.primary} />
+          <Icon name="account-circle" size={33} color={Colors.black} />
         </TouchableOpacity>
       </View>
 
+      <View style={styles.line}/>
 
-      <Modal visible={showMenu} transparent animationType="fade">
+      <Modal visible={showMenu} transparent>
         <TouchableOpacity style={styles.modalOverlay} onPress={() => setShowMenu(false)}>
           <View style={styles.dropdown}>
             <TouchableOpacity onPress={() => { setShowMenu(false); navigation.navigate('Profile'); }}>
-              <Text style={styles.dropdownItem}>👤 View Profile</Text>
+              <Text style={styles.dropdownItem}>👤 Profile</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => { setShowMenu(false); navigation.navigate('Wallet'); }}>
               <Text style={styles.dropdownItem}>💰 Wallet</Text>
@@ -93,34 +164,55 @@ const BuyerHomeScreen: React.FC = () => {
         )}
       />
 
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card1}>
-            <Image source={image2} style={styles.image} />
-            <View style={styles.info}>
-              <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-              <Text style={styles.price}>USD {item.price.toFixed(2)}</Text>
-              <View style={styles.ratingContainer}>
-                <Icon name="star" size={16} color="#FFD700" />
-                <Text style={styles.ratingText}>{item.rating.toFixed(1)}</Text>
-              </View>
-            </View>
-          </View>
-        )}
-      />
-
+      {
+        spareParts && spareParts.length > 0 ? (
+          <FlatList
+            data={spareParts}
+            numColumns={1}
+            keyExtractor={(item) => item._id}
+            renderItem={({ item }) => (
+              <Pressable onPress={() => navigation.navigate('Profile')} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
+                <View style={styles.card2}>
+                  <Image source={image2} style={styles.image} />
+                  <View style={styles.info}>
+                    <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
+                    <Text style={styles.price}>₹{parseFloat(item.price.$numberDecimal).toFixed(2)}</Text>
+                    <View style={styles.ratingContainer}>
+                      <Icon name="star" size={16} color="#FFD700" />
+                      <Text style={styles.ratingText}>{item.averageRating}</Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity style={styles.cart} onPress={() => handleAddCart(item)}>
+                    <Icon name="cart" size={33} color={Colors.primary} />
+                  </TouchableOpacity>
+                </View>
+              </Pressable>
+            )}
+          />
+        ) : (
+          <Text style={styles.noItemsText}>There are no items available right now.</Text>
+        )
+      }
 
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  line:{
+    height:2,
+    backgroundColor: Colors.primary,
+  },
+  noItemsText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+    color: '#666',
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingTop: 30,
+    paddingTop: 15,
   },
   header: {
     flexDirection: 'row',
@@ -131,7 +223,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '800',
     color: Colors.primary,
   },
   menuButton: {
@@ -148,12 +240,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryButtonBG,
     padding: 15,
     borderRadius: 12,
-    width: 180,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 5,
+    width: 150,
   },
   dropdownItem: {
     fontSize: 16,
@@ -163,6 +250,7 @@ const styles = StyleSheet.create({
   grid: {
     alignItems: 'center',
     paddingVertical: 10,
+    marginBottom: 140,
   },
   card: {
     backgroundColor: Colors.secondaryButtonBG,
@@ -172,7 +260,7 @@ const styles = StyleSheet.create({
     width: width * 0.42,
     margin: 10,
     alignItems: 'center',
-    elevation: 2,
+    elevation: 1,
   },
   cardText: {
     marginTop: 10,
@@ -180,14 +268,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: Colors.black,
   },
-  card1: {
+  card2: {
     flexDirection: 'row',
     backgroundColor: Colors.inputContainerBG,
     borderRadius: 12,
-    marginVertical: 5,
+    marginVertical: 7,
     marginHorizontal: 16,
     padding: 10,
-    elevation: 1,
+    elevation: 2,
   },
   image: {
     width: width * 0.25,
@@ -202,11 +290,11 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.black,
+    color: Colors.secondary,
   },
   price: {
     fontSize: 14,
-    color: Colors.primary,
+    color: Colors.black,
     fontWeight: '500',
   },
   ratingContainer: {
@@ -218,6 +306,11 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 14,
     color: Colors.black,
+  },
+  cart: {
+    justifyContent: 'flex-end',
+    marginBottom: 20,
+    marginRight: 20,
   },
 });
 

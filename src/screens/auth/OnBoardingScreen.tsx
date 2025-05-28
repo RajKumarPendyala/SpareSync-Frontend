@@ -8,7 +8,7 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackParamList } from '../../navigation/StackNavigator';
-import Colors from '../../contexts/colors';
+import Colors from '../../context/colors';
 
 const { width } = Dimensions.get('window');
 
@@ -20,8 +20,8 @@ interface Props {
 
 const OnBoardingScreen: React.FC<Props> = ({ navigation }) => {
 
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [userRole, setUserRole] = useState('buyer');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState('');
 
   const partnest_logo = require('../../assets/icons/partnest_logo.png');
 

@@ -7,13 +7,14 @@ import {
   Image,
   StyleSheet,
   Dimensions,
+  ScrollView,
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import isValidEmail from '../../utils/isValidEmail';
-import Colors from '../../contexts/colors';
+import Colors from '../../context/colors';
 import axios from 'axios';
 import { IP_ADDRESS } from '@env';
 
@@ -33,6 +34,8 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
   const partnest_logo = require('../../assets/icons/partnest_logo.png');
 
   const handleSend = async () => {
+
+console.log('forgotPasswordScreen - handleSend');
 
     if (!email) {
       setErrorMessage('Please enter your email address.');
@@ -74,7 +77,7 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Image source={partnest_logo} style={styles.logo} resizeMode="contain" />
 
       <Text style={styles.infoText}>
@@ -101,13 +104,13 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
           ( <Text style={styles.sendText}>Send</Text> )
         }
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: Colors.background,
     alignItems: 'center',
     paddingTop: 60,

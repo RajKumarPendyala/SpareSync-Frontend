@@ -9,13 +9,14 @@ import {
   Dimensions,
   Image,
   ActivityIndicator,
+  ScrollView,
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../../navigation/StackNavigator';
 import validatePassword from '../../utils/validatePassword';
-import Colors from '../../contexts/colors';
+import Colors from '../../context/colors';
 import axios from 'axios';
 import { IP_ADDRESS } from '@env';
 
@@ -76,6 +77,9 @@ const PasswordResetScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleResendOtp = async () => {
+
+console.log('PasswordResetScreen - handleResendOtp',email);
+
     if (!isResendEnabled) {return;}
     try {
       await axios.post(
@@ -150,7 +154,7 @@ const PasswordResetScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Image source={partnest_logo} style={styles.logo} resizeMode="contain" />
       <View style={styles.inputWrapper}>
         <OtpInput
@@ -226,13 +230,13 @@ const PasswordResetScreen: React.FC<Props> = ({ navigation, route }) => {
       <TouchableOpacity style={styles.cancelButton} onPress={handleCancel} disabled={loading}>
         <Text style={styles.cancelText}>Cancel</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: 'center',
     paddingTop: 60,
     backgroundColor: Colors.background,
