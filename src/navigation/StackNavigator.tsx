@@ -6,10 +6,11 @@ import OnBoardingScreen from '../screens/auth/OnBoardingScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 import PasswordResetScreen from '../screens/auth/PasswordResetScreen';
 import TermsAndConditionsScreen from '../screens/auth/TermsAndConditionsScreen';
-import SparePartsScreen from '../screens/common/SparePartsScreen';
+import SparePartsScreen from '../screens/buyer/BuyerSparePartsScreen';
 import ProfileScreen from '../screens/common/ProfileScreen';
-import WalletScreen from '../screens/common/WalletScreen';
+import WalletScreen from '../screens/buyer/WalletScreen';
 import ChangePasswordScreen from '../screens/common/ChangePasswordScreen';
+import BuyerProductDetailsScreen from '../screens/buyer/BuyerProductDetailsScreen';
 import Colors from '../context/colors';
 import BuyerTabNav from './BuyerTabNav';
 import SellerTabNav from './SellerTabNav';
@@ -30,6 +31,7 @@ export type StackParamList = {
     Wallet: undefined;
     Profile: undefined;
     ChangePassword: undefined;
+    BuyerProductDetails: { partId: string };
 };
 
 const Stack = createStackNavigator<StackParamList>();
@@ -54,6 +56,7 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Personas" component={PersonasScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Terms" component={TermsAndConditionsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="BuyerProductDetails" component={BuyerProductDetailsScreen}  options={{ headerShown: false }}/>
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
             <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
             <Stack.Screen name="PasswordReset" component={PasswordResetScreen} options={{ headerShown: false }}/>

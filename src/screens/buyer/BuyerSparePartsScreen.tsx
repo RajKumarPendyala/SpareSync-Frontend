@@ -106,7 +106,7 @@ console.log('SparePartsScreen.handleAddCart');
             data={filteredParts}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => (
-              <Pressable onPress={() => navigation.navigate('Profile')} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
+              <Pressable onPress={() => navigation.navigate('BuyerProductDetails', { partId: item._id })} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
                 <View style={styles.card2}>
                   <Image source={image2} style={styles.image} />
                   <View style={styles.info}>

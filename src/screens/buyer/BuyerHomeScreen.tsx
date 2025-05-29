@@ -31,9 +31,9 @@ const categories = [
   { id: '1', name: 'Mobile Devices', icon: 'cellphone', value: 'MobileDevices' },
   { id: '2', name: 'Computers & Laptops', icon: 'laptop', value: 'ComputingDevices'},
   { id: '3', name: 'Home Appliances', icon: 'fridge', value: 'HomeAppliances'},
-  { id: '4', name: 'Wearables & Smart Tech', icon: 'watch-variant', value: 'Wearable&SmartDevices' },
-  { id: '5', name: 'Entertainment Devices', icon: 'television', value: 'Entertainment&MediaDevices' },
-  { id: '6', name: 'Gaming Consoles', icon: 'gamepad-variant', value: 'GamingConsoles'},
+  { id: '4', name: 'Gaming Consoles', icon: 'gamepad-variant', value: 'GamingConsoles'},
+  { id: '5', name: 'Wearables & Smart Tech', icon: 'watch-variant', value: 'Wearable&SmartDevices' },
+  { id: '6', name: 'Entertainment Devices', icon: 'television', value: 'Entertainment&MediaDevices' },
 ];
 
 const BuyerHomeScreen: React.FC = () => {
@@ -171,7 +171,7 @@ console.log('BuyerScreen.handleAddCart');
             numColumns={1}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => (
-              <Pressable onPress={() => navigation.navigate('Profile')} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
+              <Pressable onPress={() => navigation.navigate('BuyerProductDetails', { partId: item._id })} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
                 <View style={styles.card2}>
                   <Image source={image2} style={styles.image} />
                   <View style={styles.info}>
@@ -212,7 +212,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingTop: 15,
+    // paddingTop: 15,
+    paddingTop: 30,
   },
   header: {
     flexDirection: 'row',
@@ -250,7 +251,7 @@ const styles = StyleSheet.create({
   grid: {
     alignItems: 'center',
     paddingVertical: 10,
-    marginBottom: 140,
+    marginBottom: 120,
   },
   card: {
     backgroundColor: Colors.secondaryButtonBG,
