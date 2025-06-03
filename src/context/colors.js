@@ -8,6 +8,7 @@ const Colors = {
     inputContainerBD: '#ccc',
     icon: '#888',
     black: '#777',
+    green: '#84AE92',
 };
 
 export default Colors;

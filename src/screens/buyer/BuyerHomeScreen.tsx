@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   Alert,
   Pressable,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -42,17 +42,16 @@ const BuyerHomeScreen: React.FC = () => {
   const { spareParts, setSpareParts } = useSpareParts(); // use context
 
 
-  useEffect(() => {
     const fetchSpareParts = async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
-        const response = await axios.get(
-          `http://${IP_ADDRESS}:3000/api/users/products/`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          const token = await AsyncStorage.getItem('token');
+          const response = await axios.get(
+            `http://${IP_ADDRESS}:3000/api/users/products/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
         );
 
 console.log('daata',response);
@@ -63,8 +62,12 @@ console.log('daata',response);
       }
     };
 
-    fetchSpareParts();
-  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchSpareParts();
+    }, [])
+  );
 
 
 
@@ -139,13 +142,13 @@ console.log('BuyerScreen.handleAddCart');
         <TouchableOpacity style={styles.modalOverlay} onPress={() => setShowMenu(false)}>
           <View style={styles.dropdown}>
             <TouchableOpacity onPress={() => { setShowMenu(false); navigation.navigate('Profile'); }}>
-              <Text style={styles.dropdownItem}>👤 Profile</Text>
+              <Text style={styles.dropdownItem}><Icon name="account-circle-outline" size={16} color={Colors.primary} />   Profile</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => { setShowMenu(false); navigation.navigate('Wallet'); }}>
-              <Text style={styles.dropdownItem}>💰 Wallet</Text>
+              <Text style={styles.dropdownItem}><Icon name="wallet-outline" size={16} color={Colors.primary} />   Wallet</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleLogout}>
-              <Text style={[styles.dropdownItem, { color: Colors.secondary }]}>🚪 Logout</Text>
+              <Text style={[styles.dropdownItem, { color: Colors.secondary }]}><Icon name="logout" size={16} color={Colors.secondary} />   Logout</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -176,7 +179,16 @@ console.log('BuyerScreen.handleAddCart');
                   <Image source={image2} style={styles.image} />
                   <View style={styles.info}>
                     <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-                    <Text style={styles.price}>₹{parseFloat(item.price.$numberDecimal).toFixed(2)}</Text>
+                    <Text style={styles.price}>₹{(
+                        parseFloat(item.price.$numberDecimal) *
+                        (1 - parseFloat(item.discount.$numberDecimal) / 100)
+                      ).toFixed(2)}
+                    </Text>
+                    {parseFloat(item.discount.$numberDecimal || '0') > 0 && (
+                      <>
+                        <Text style={styles.discount}>-{parseFloat(item.discount.$numberDecimal).toFixed(0)}%</Text>
+                      </>
+                    )}
                     <View style={styles.ratingContainer}>
                       <Icon name="star" size={16} color="#FFD700" />
                       <Text style={styles.ratingText}>{item.averageRating}</Text>
@@ -241,7 +253,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryButtonBG,
     padding: 15,
     borderRadius: 12,
-    width: 150,
+    width: 130,
   },
   dropdownItem: {
     fontSize: 16,
@@ -291,12 +303,16 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.secondary,
+    color: Colors.green,
   },
   price: {
     fontSize: 14,
     color: Colors.black,
     fontWeight: '500',
+  },
+  discount: {
+    fontSize: 12,
+    color: Colors.secondary,
   },
   ratingContainer: {
     flexDirection: 'row',

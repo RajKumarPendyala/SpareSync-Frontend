@@ -46,8 +46,10 @@ const BuyerTabNav: React.FC = () => {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerStyle: { backgroundColor: Colors.primary },
-        headerTintColor: Colors.secondary,
-        headerTitleStyle: { fontWeight: '400' },
+        headerTintColor: Colors.background,
+        headerTitleStyle: {
+            fontWeight: '400',
+        },
         tabBarIcon: getTabBarIcon(route),
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.icon,
@@ -55,7 +57,7 @@ const BuyerTabNav: React.FC = () => {
       initialRouteName="Home"
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
-      <Tab.Screen name="Cart" component={CartScreen} />
+      <Tab.Screen name="Cart" component={CartScreen} options={{ headerShown: false }}/>
       <Tab.Screen name="Chat" component={ChatScreen} />
       <Tab.Screen name="Order" component={OrderScreen} />
     </Tab.Navigator>

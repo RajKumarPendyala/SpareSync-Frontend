@@ -79,6 +79,18 @@ console.log('SparePartsScreen.handleAddCart');
   return (
     <View style={styles.screen}>
       <ScrollView>
+        <View style={styles.header}>
+          <Text style={styles.name}>{product.name}</Text>
+          <Text style={styles.star}>
+            <Icon
+              name={ 'star'}
+              size={16}
+              color="#f1c40f"
+            />
+            {product.averageRating || 0}/5
+          </Text>
+        </View>
+
         <FlatList
           horizontal
           pagingEnabled
@@ -91,12 +103,25 @@ console.log('SparePartsScreen.handleAddCart');
         />
 
         <View style={styles.detailsContainer}>
-          <Text style={styles.name}>{product.name}</Text>
-          <Text style={styles.price}>₹{parseFloat(product.price.$numberDecimal).toFixed(2)}</Text>
-          {parseFloat(product.discount) > 0 && (
-            <Text style={styles.discount}>Discount: ₹{parseFloat(product.discount.$numberDecimal).toFixed(2)}</Text>
-          )}
-
+          <View style={styles.priceDiscount}>
+            {parseFloat(product.discount.$numberDecimal) > 0 && (
+              <>
+                <Text style={styles.price}>
+                  {'₹' + parseFloat(product.price.$numberDecimal).toFixed(2)}
+                </Text>
+                <Text style={styles.discount}>
+                  {'  -' + parseFloat(product.discount.$numberDecimal).toFixed(0)}%
+                </Text>
+              </>
+            )}
+            <Text style={styles.discountPrice}>
+              ₹
+              {(
+                parseFloat(product.price.$numberDecimal) *
+                (1 - parseFloat(product.discount.$numberDecimal) / 100)
+              ).toFixed(2)}
+            </Text>
+          </View>
           <Text style={styles.label}>Brand: <Text style={styles.value}>{product.brand}</Text></Text>
           <Text style={styles.label}>Type: <Text style={styles.value}>{product.gadgetType}</Text></Text>
           <Text style={styles.label}>Color: <Text style={styles.value}>{product.color || 'N/A'}</Text></Text>
@@ -104,8 +129,6 @@ console.log('SparePartsScreen.handleAddCart');
           <Text style={styles.label}>Warranty: <Text style={styles.value}>{product.warrentyPeriod || 0} months</Text></Text>
           <Text style={styles.label}>Quantity Available: <Text style={styles.value}>{product.quantity}</Text></Text>
           <Text style={styles.label}>Dimensions: <Text style={styles.value}>{product.dimension || 'N/A'}</Text></Text>
-          <Text style={styles.label}>Average Rating: <Text style={styles.value}>{product.averageRating || 0}/5</Text></Text>
-
           <Text style={styles.descTitle}>Description</Text>
           <Text style={styles.description}>{product.description}</Text>
 
@@ -162,79 +185,112 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  image: {
+  header: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     width,
+    padding: 20,
+    marginTop: 40,
+  },
+  star: {
+    flex: 1,
+    textAlign: 'right',
+    color: Colors.primary,
+  },
+  image: {
+    marginLeft: 10,
+    width : width * 0.9,
     height: width * 0.7,
     resizeMode: 'cover',
   },
   detailsContainer: {
-    padding: 16,
+    padding: 20,
   },
   name: {
     fontSize: 22,
     fontWeight: '700',
-    color: Colors.primary,
+  },
+  priceDiscount: {
+    flex: 1,
+    flexDirection: 'row',
+    borderBottomWidth: 0.5,
+    borderColor: '#ccc',
   },
   price: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: Colors.icon,
+    textDecorationLine: 'line-through',
+    marginTop: 1,
+  },
+  discountPrice: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: '500',
     color: Colors.primary,
-    marginTop: 4,
+    marginTop: 1,
   },
   discount: {
-    fontSize: 14,
+    fontSize: 20,
+    fontWeight: '500',
+    marginRight: 10,
     color: Colors.secondary,
-    marginBottom: 8,
+    marginBottom: 10,
   },
   label: {
     fontSize: 15,
-    color: Colors.primary,
-    marginTop: 6,
+    fontWeight: '900',
+    color: Colors. black,
+    marginTop: 10,
   },
   value: {
-    fontWeight: '600',
-    color: Colors.secondary,
+    color: Colors.icon,
+    fontWeight: 400,
   },
   descTitle: {
     fontSize: 18,
     fontWeight: '700',
-    marginTop: 14,
-    color: Colors.primary,
+    marginTop: 10,
+    color: Colors.black,
   },
   description: {
     fontSize: 14,
-    color: Colors.primary,
+    color: Colors.icon,
     marginTop: 6,
+    borderBottomWidth: 0.5,
+    paddingBottom: 10,
+    borderColor: '#ccc',
   },
   reviewTitle: {
-    marginTop: 20,
+    marginTop: 10,
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.black,
   },
   reviewContainer: {
-    marginTop: 12,
-    paddingBottom: 10,
+    marginTop: 15,
+    paddingBottom: 15,
     borderBottomWidth: 0.5,
     borderColor: '#ccc',
   },
   reviewHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 10,
   },
   userImage: {
     width: 42,
     height: 42,
     borderRadius: 21,
-    marginRight: 10,
+    marginRight: 15,
   },
   userInfo: {
     flexDirection: 'column',
   },
   userName: {
-    fontWeight: '600',
-    color: Colors.primary,
+    fontWeight: '500',
+    marginBottom: 5,
+    color: Colors.icon,
   },
   ratingRow: {
     flexDirection: 'row',
@@ -249,7 +305,7 @@ const styles = StyleSheet.create({
     height: 70,
     borderRadius: 6,
     marginRight: 8,
-    marginTop: 6,
+    marginTop: 10,
   },
   noReviews: {
     marginTop: 8,

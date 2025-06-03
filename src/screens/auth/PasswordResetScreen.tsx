@@ -133,7 +133,6 @@ console.log('PasswordResetScreen - handleResendOtp',email);
         }
       );
       console.log(res);
-      
       if (res.data.success) {
         navigation.replace('Login');
         Alert.alert('Success', 'Password reset successful. Please login.');

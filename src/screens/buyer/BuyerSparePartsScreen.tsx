@@ -111,7 +111,12 @@ console.log('SparePartsScreen.handleAddCart');
                   <Image source={image2} style={styles.image} />
                   <View style={styles.info}>
                     <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-                    <Text style={styles.price}>₹{parseFloat(item.price.$numberDecimal).toFixed(2)}</Text>
+                    <Text style={styles.price}>₹{(
+                        parseFloat(item.price.$numberDecimal) *
+                        (1 - parseFloat(item.discount.$numberDecimal) / 100)
+                      ).toFixed(2)}
+                    </Text>
+                    <Text style={styles.discount}>-{parseFloat(item.discount.$numberDecimal).toFixed(0)}%</Text>
                     <View style={styles.ratingContainer}>
                       <Icon name="star" size={16} color="#FFD700" />
                       <Text style={styles.ratingText}>{item.averageRating}</Text>
@@ -219,12 +224,16 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.secondary,
+    color: Colors.green,
   },
   price: {
     fontSize: 14,
     color: Colors.black,
     fontWeight: '500',
+  },
+  discount: {
+    fontSize: 12,
+    color: Colors.secondary,
   },
   ratingContainer: {
     flexDirection: 'row',
