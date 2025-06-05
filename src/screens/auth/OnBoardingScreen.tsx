@@ -21,7 +21,7 @@ interface Props {
 const OnBoardingScreen: React.FC<Props> = ({ navigation }) => {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<string | null>('');
 
   const partnest_logo = require('../../assets/icons/partnest_logo.png');
 
@@ -37,24 +37,25 @@ const OnBoardingScreen: React.FC<Props> = ({ navigation }) => {
       }
     };
     checkLoginStatus();
+  }, []);
 
+  useEffect(() => {
     const timer = setTimeout(() => {
-
-      navigation.replace(
-        isLoggedIn
-          ? userRole === 'admin'
+      if (isLoggedIn && userRole) {
+        navigation.replace(
+          userRole === 'admin'
             ? 'AdminTabNav'
             : userRole === 'seller'
             ? 'SellerTabNav'
             : 'BuyerTabNav'
-          : 'Login'
-      );
-
+        );
+      } else {
+        navigation.replace('Login');
+      }
     }, 1000);
 
     return () => clearTimeout(timer);
-
-  }, []);
+  }, [isLoggedIn, userRole]);
 
 
 return (

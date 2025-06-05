@@ -9,10 +9,10 @@ import {
   Text,
   Alert,
 } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
 import { useProfile } from '../../context/ProfileContext';
 import axios from 'axios';
 import { IP_ADDRESS } from '@env';
+import pickAndUploadImage from '../../utils/pickAndUploadImage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../../navigation/StackNavigator';
@@ -30,6 +30,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
 
   const { profile, setProfile } = useProfile();
   const [editable, setEditable] = useState(false);
+  const [url, setUrl] = useState('');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -68,31 +69,19 @@ console.log(response);
     fetchProfile();
   }, [setProfile]);
 
-  const handleImageUpload = () => {
-console.log('Upload image button clicked');
-    launchImageLibrary(
-      {
-        mediaType: 'photo',
-        quality: 1,
-      },
-      (response) => {
-console.log('ImagePicker response:', response);
 
-        if (response.didCancel) {
-          console.log('User cancelled image picker');
-          return;
-        }
-        if (response.errorCode) {
-          console.log('ImagePicker Error: ', response.errorMessage);
-          Alert.alert('Error', 'Failed to select image.');
-          return;
-        }
-        if (response.assets && response.assets.length > 0) {
-          const uri = response.assets[0].uri;
-          setProfile({ ...profile, image: { path: uri } });
-        }
-      }
-    );
+  const handleImageUpload = async () => {
+    const imageUrl = await pickAndUploadImage();
+    if (!imageUrl) {
+      Alert.alert('Upload Failed', 'Please try again.');
+      return;
+    }
+    setUrl(imageUrl);
+    console.log('handleImageUrl: ',imageUrl);
+    setProfile(prev => ({
+      ...prev,
+      image: { path: imageUrl ?? '' },
+    }));
   };
 
   const handleSave = async () => {
@@ -111,7 +100,7 @@ console.log('ImagePicker response:', response);
 
       setEditable(false);
 
-      const updateData = {
+      const updateData: any = {
         name: profile.name,
         phoneNumber: profile.phoneNumber,
         houseNo: profile.address.houseNo,
@@ -121,13 +110,18 @@ console.log('ImagePicker response:', response);
         state: profile.address.state,
       };
 
+      if (url) {
+        console.log(url);
+        updateData.imagePath = url;
+      }
+
       const response = await axios.patch(
         `http://${IP_ADDRESS}:3000/api/users/profile`,
         { updateData },
         {
           headers: {
-            'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
         }
       );
@@ -144,25 +138,27 @@ console.log('ImagePicker response:', response);
     }
   };
 
-  const imageUri = `http://${IP_ADDRESS}:3000${profile?.image?.path || ''}`;
-  console.log('Image URI:', imageUri);
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <TouchableOpacity
-      onPress={handleImageUpload}
-      >
-        <Image
-          source={
-            profile?.image?.path
-              ? { uri: imageUri }
-              : require('../../assets/icons/partnest_logo.png')
-          }
-          style={styles.avatar}
-          onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
-        />
-        <Text style={styles.uploadText}>Upload Profile Image</Text>
-      </TouchableOpacity>
+      <Image
+        source={
+          profile?.image?.path
+            ? { uri: profile.image.path }
+            : { uri: 'https://res.cloudinary.com/dxcbw424l/image/upload/v1749116154/rccjtgfk1lt74twuxo3b.jpg' }
+        }
+        style={styles.avatar}
+        onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
+      />
+      {
+        editable ?
+        (
+          <TouchableOpacity
+            onPress={handleImageUpload}
+          >
+            <Text style={styles.uploadText}>Edit Profile Image</Text>
+          </TouchableOpacity>
+        ) : ''
+      }
 
       <TextInput
         style={styles.input}
@@ -238,7 +234,7 @@ console.log('ImagePicker response:', response);
 
 const styles = StyleSheet.create({
   container: { padding: 20 },
-  avatar: { width: 100, height: 100, borderRadius: 50, alignSelf: 'center', marginBottom: 10 },
+  avatar: { width: 110, height: 110, borderRadius: 55, alignSelf: 'center', marginBottom: 10, borderWidth: 2, borderColor: Colors.inputContainerBD },
   uploadText: { textAlign: 'center', color: Colors.primary, marginBottom: 20 },
   input: {
     borderBottomWidth: 1,

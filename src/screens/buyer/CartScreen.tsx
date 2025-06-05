@@ -45,7 +45,7 @@ const handleDelete = async (item: any) => {
     await fetchCart();
 
     if (response.data.message) {
-      Alert.alert('Item removed from cart successfully!');
+      Alert.alert('Success','Item removed from cart successfully!');
     }
   } catch (error: any) {
     console.error('Error removing to cart:', error?.response?.data || error.message);
@@ -113,7 +113,15 @@ const handleDelete = async (item: any) => {
             pressed && { opacity: 0.9 },
           ]}
         >
-          <Image source={require('../../assets/icons/partnest_logo.png')} style={styles.image} />
+        <Image
+          source={
+            part?.images[0]?.path
+              ? { uri: part?.images[0]?.path }
+              : { uri: 'https://res.cloudinary.com/dxcbw424l/image/upload/v1749116154/rccjtgfk1lt74twuxo3b.jpg' }
+          }
+          style={styles.image}
+          onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
+        />
           <View style={styles.details}>
             <Text style={styles.name}>{partName}</Text>
             <View style={styles.priceDiscount}>
@@ -178,7 +186,7 @@ const handleDelete = async (item: any) => {
   };
 
   if (loading) {
-    return <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 50 }} />;
+    return <ActivityIndicator size="large" color={Colors.primary} />;
   }
 
   if (!cart || !cart.items || cart.items.length === 0) {

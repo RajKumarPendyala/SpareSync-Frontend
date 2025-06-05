@@ -11,8 +11,6 @@ import Colors from '../../context/colors';
 
 const { width } = Dimensions.get('window');
 
-const image2 = require('../../assets/icons/partnest_logo.png');
-
 type SparePartsScreenNavigationProp = StackNavigationProp<StackParamList, 'SpareParts'>;
 
 interface Props {
@@ -108,7 +106,15 @@ console.log('SparePartsScreen.handleAddCart');
             renderItem={({ item }) => (
               <Pressable onPress={() => navigation.navigate('BuyerProductDetails', { partId: item._id })} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
                 <View style={styles.card2}>
-                  <Image source={image2} style={styles.image} />
+                  <Image
+                    source={
+                      item?.images[0]?.path
+                        ? { uri: item?.images[0]?.path }
+                        : { uri: 'https://res.cloudinary.com/dxcbw424l/image/upload/v1749116154/rccjtgfk1lt74twuxo3b.jpg' }
+                    }
+                    style={styles.image}
+                    onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
+                  />
                   <View style={styles.info}>
                     <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
                     <Text style={styles.price}>₹{(
@@ -144,14 +150,14 @@ console.log('SparePartsScreen.handleAddCart');
             <Text style={styles.modalTitle}>Select Brand</Text>
             {uniqueBrands.map((brand) => (
               <TouchableOpacity
-                key={brand}
+              key={brand as React.Key}
                 onPress={() => {
-                  setSelectedBrand(brand);
+                  setSelectedBrand(brand as string);
                   setBrandModalVisible(false);
                 }}
                 style={styles.modalOption}
               >
-                <Text style={styles.modalOptionText}>{brand}</Text>
+                <Text style={styles.modalOptionText}>{brand as string}</Text>
               </TouchableOpacity>
             ))}
           </View>

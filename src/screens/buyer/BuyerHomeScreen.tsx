@@ -21,7 +21,6 @@ import axios from 'axios';
 import { useSpareParts } from '../../context/SparePartsContext';
 import Colors from '../../context/colors';
 
-const image2 = require('../../assets/icons/partnest_logo.png');
 
 type RootStackNavigationProp = StackNavigationProp<StackParamList, 'BuyerTabNav'>;
 
@@ -131,7 +130,7 @@ console.log('BuyerScreen.handleAddCart');
 
       <View style={styles.header}>
         <Text style={styles.logo}>SpareSync</Text>
-        <TouchableOpacity style={styles.menuButton} onPress={() => setShowMenu(true)}>
+        <TouchableOpacity style={styles.menuButton} onPress={() => {setShowMenu(true);}}>
           <Icon name="account-circle" size={33} color={Colors.black} />
         </TouchableOpacity>
       </View>
@@ -176,7 +175,15 @@ console.log('BuyerScreen.handleAddCart');
             renderItem={({ item }) => (
               <Pressable onPress={() => navigation.navigate('BuyerProductDetails', { partId: item._id })} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
                 <View style={styles.card2}>
-                  <Image source={image2} style={styles.image} />
+                  <Image
+                    source={
+                      item?.images[0]?.path
+                        ? { uri: item?.images[0]?.path }
+                        : { uri: 'https://res.cloudinary.com/dxcbw424l/image/upload/v1749116154/rccjtgfk1lt74twuxo3b.jpg' }
+                    }
+                    style={styles.image}
+                    onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
+                  />
                   <View style={styles.info}>
                     <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
                     <Text style={styles.price}>₹{(

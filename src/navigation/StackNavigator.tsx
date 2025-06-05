@@ -11,6 +11,7 @@ import ProfileScreen from '../screens/common/ProfileScreen';
 import WalletScreen from '../screens/buyer/WalletScreen';
 import ChangePasswordScreen from '../screens/common/ChangePasswordScreen';
 import BuyerProductDetailsScreen from '../screens/buyer/BuyerProductDetailsScreen';
+import ChatDetailScreen from '../screens/common/ChatDetailScreen';
 import Colors from '../context/colors';
 import BuyerTabNav from './BuyerTabNav';
 import SellerTabNav from './SellerTabNav';
@@ -32,6 +33,7 @@ export type StackParamList = {
     Profile: undefined;
     ChangePassword: undefined;
     BuyerProductDetails: { partId: string };
+    ChatDetail: { conversationId: string };
 };
 
 const Stack = createStackNavigator<StackParamList>();
@@ -63,6 +65,7 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="BuyerTabNav" component={BuyerTabNav} options={{ headerShown: false }}  />
             <Stack.Screen name="AdminTabNav" component={AdminTabNav} options={{ headerShown: false }}  />
             <Stack.Screen name="SellerTabNav" component={SellerTabNav} options={{ headerShown: false }} />
+            <Stack.Screen name="ChatDetail" component={ChatDetailScreen} options={{ headerShown: false }} />
             <Stack.Screen name="SpareParts"
                 component={SparePartsScreen}
                 options={({ route }) => ({

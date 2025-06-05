@@ -98,7 +98,15 @@ console.log('SparePartsScreen.handleAddCart');
           data={product.images}
           keyExtractor={(_, i) => i.toString()}
           renderItem={({ item }) => (
-            <Image source={{ uri: `http://${IP_ADDRESS}:3000${item.path}` }} style={styles.image} />
+            <Image
+              source={
+                item?.path
+                  ? { uri: item?.path }
+                  : { uri: 'https://res.cloudinary.com/dxcbw424l/image/upload/v1749116154/rccjtgfk1lt74twuxo3b.jpg' }
+              }
+              style={styles.image}
+              onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
+            />
           )}
         />
 
@@ -138,8 +146,13 @@ console.log('SparePartsScreen.handleAddCart');
               <View key={index} style={styles.reviewContainer}>
                 <View style={styles.reviewHeader}>
                   <Image
-                    source={{ uri: `http://${IP_ADDRESS}:3000${review.userImage?.path}` }}
+                    source={
+                      review.userImage?.path
+                        ? { uri: review.userImage?.path }
+                        : { uri: 'https://res.cloudinary.com/dxcbw424l/image/upload/v1749116154/rccjtgfk1lt74twuxo3b.jpg' }
+                    }
                     style={styles.userImage}
+                    onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
                   />
                   <View style={styles.userInfo}>
                     <Text style={styles.userName}>{review.userName}</Text>
@@ -160,8 +173,13 @@ console.log('SparePartsScreen.handleAddCart');
                   {review.images?.map((img: any, idx: number) => (
                     <Image
                       key={idx}
-                      source={{ uri: `http://${IP_ADDRESS}:3000${img.path}` }}
+                      source={
+                        img?.path
+                          ? { uri: img?.path }
+                          : { uri: 'https://res.cloudinary.com/dxcbw424l/image/upload/v1749116154/rccjtgfk1lt74twuxo3b.jpg' }
+                      }
                       style={styles.reviewImage}
+                      onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
                     />
                   ))}
                 </ScrollView>
