@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useNavigation } from '@react-navigation/native';
 import { useSpareParts } from '../../context/SparePartsContext';
 import { IP_ADDRESS } from '@env';
 import axios from 'axios';
@@ -39,6 +40,7 @@ const BuyerProductDetailsScreen: React.FC<Props> = ({ route }) => {
   const { partId } = route.params;
 console.log(partId);
   const { spareParts } = useSpareParts();
+  const navigation = useNavigation<BuyerProductDetailsScreenNavigationProp>();
 
   const product = spareParts.find((item: any) => item._id === partId);
 
@@ -49,6 +51,30 @@ console.log(partId);
       </View>
     );
   }
+
+  const handleChatOption = async () => {
+    const token = await AsyncStorage.getItem('token');
+
+    try {
+      const response = await axios.post(
+        `http://${IP_ADDRESS}:3000/api/users/conversations/message`,
+        {
+          senderId2: product.addedBy,
+          text: 'How Can I Help You!',
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      (navigation as StackNavigationProp<StackParamList, 'BuyerProductDetails'>).navigate('ChatDetail', { conversationId: response.data.conversation._id });
+
+
+    } catch (error: any) {
+      console.error('Send message failed:', error?.response?.data || error.message);
+      Alert.alert('Fail', 'Failed to enable chat option');
+    }
+  };
 
   const handleAddCart = async (item: any) => {
     try {
@@ -190,6 +216,13 @@ console.log('SparePartsScreen.handleAddCart');
           )}
         </View>
       </ScrollView>
+
+      <TouchableOpacity
+        style={styles.floatingChatIcon}
+        onPress={() => handleChatOption()}
+      >
+        <Icon name="comments" size={24} color="white" />
+      </TouchableOpacity>
 
       <TouchableOpacity style={styles.cartButton} onPress={() => handleAddCart(product)}>
         <Text style={styles.cartButtonText}>Add to Cart</Text>
@@ -348,6 +381,20 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     color: Colors.secondary,
+  },
+  floatingChatIcon: {
+    position: 'absolute',
+    right: 20,
+    bottom: 80,
+    backgroundColor: Colors.primary,
+    borderRadius: 30,
+    padding: 14,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    zIndex: 10,
   },
 });
 

@@ -14,7 +14,6 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Colors from '../../context/colors';
-// import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Conversation = {
@@ -64,30 +63,6 @@ console.log('conversation response: ',response);
       }, [])
     );
 
-    // const handleDelete = async (otherParticipant: any) => {
-    //   try {
-    //     const token = await AsyncStorage.getItem('token');
-    //     const response = await axios.patch(
-    //       `http://${IP_ADDRESS}:3000/api/users/conversations`,
-    //       { id: otherParticipant._id },
-    //       {
-    //         headers: {
-    //           Authorization: `Bearer ${token}`,
-    //         },
-    //       }
-    //     );
-
-    //     await fetchConversations();
-
-    //     if (response.data.message) {
-    //       Alert.alert('Success','Conversation removed from chat successfully!');
-    //     }
-    //   } catch (error: any) {
-    //     console.error('Error removing conversation:', error?.response?.data || error.message);
-    //     Alert.alert('Failed to remove conversation.');
-    //   }
-    // };
-
   const renderItem = ({ item }: { item: Conversation }) => {
     const today = new Date();
     const yy =  String(today.getFullYear()).slice(2);
@@ -110,7 +85,7 @@ console.log('conversation response: ',response);
 
 
 
-  const otherParticipant = item.participants.find(p => p._id !== currentUserId);
+  const otherParticipant: any = item.participants.find(p => p._id !== currentUserId);
 
     return (
       <TouchableOpacity
@@ -127,7 +102,7 @@ console.log('conversation response: ',response);
           onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
         />
         <View style={styles.chatInfo}>
-          <Text style={styles.name}>{otherParticipant?.name || 'Unknown'}</Text>
+          <Text style={styles.name}>{otherParticipant?.name?.charAt(0)?.toUpperCase() + otherParticipant.name.slice(1)  || 'Unknown'}</Text>
           <Text style={styles.message} numberOfLines={1}>
             {item.lastMessage?.text || 'Start chatting'}
           </Text>
@@ -180,7 +155,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 24,
-    marginRight: 20,
+    marginRight: 15,
   },
   chatInfo: {
     flex: 1,

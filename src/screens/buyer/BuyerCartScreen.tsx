@@ -62,8 +62,7 @@ const handleDelete = async (item: any) => {
       setCart(res.data.cartData);
 
     } catch (err: any) {
-
-      Alert.alert('Error fetching cart');
+      setCart(null);
     } finally {
       setLoading(false);
     }
@@ -95,6 +94,30 @@ const handleDelete = async (item: any) => {
     } catch (error: any) {
       console.error('Error updating quantity:', error?.response?.data || error.message);
       Alert.alert('Failed to update quantity.');
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      console.log(token);
+      const response = await axios.post(
+        `http://${IP_ADDRESS}:3000/api/users/orders/`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        Alert.alert('Success','Order placed successfully!');
+        setCart(null);
+      }
+    } catch (error: any) {
+      console.error('Error placing order:', error?.response?.data || error.message);
+      Alert.alert('Fail','Failed to place order.');
     }
   };
 
@@ -208,9 +231,17 @@ const handleDelete = async (item: any) => {
         renderItem={renderItem}
       />
       <View style={styles.summary}>
-        <Text style={styles.totalText}>Total: ₹{total}</Text>
+      <View style={styles.priceDiscount}>
+        <Text style={styles.totalText}>Total:</Text>
+              {parseFloat(discount || '0') > 0 && (
+                <>
+                  <Text style={styles.totalText2}>₹{total}</Text>
+                </>
+              )}
+              <Text style={styles.totalText}>₹{(parseFloat(total) - parseFloat(discount || '0')).toFixed(2)}</Text>
+            </View>
         <Text style={styles.discountText}>Discount: ₹{discount}</Text>
-        <TouchableOpacity style={styles.checkoutButton} onPress={() => Alert.alert('Proceed to Checkout')}>
+        <TouchableOpacity style={styles.checkoutButton} onPress={() => handlePlaceOrder() }>
           <Text style={styles.checkoutText}>Proceed to Checkout</Text>
         </TouchableOpacity>
       </View>
@@ -264,6 +295,14 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: Colors.icon,
     marginRight: 10,
+    textDecorationLine: 'line-through',
+  },
+  totalText2: {
+    fontSize: 17,
+    fontWeight: '400',
+    color: Colors.icon,
+    marginRight: 10,
+    marginLeft: 10,
     textDecorationLine: 'line-through',
   },
   discountPrice: {

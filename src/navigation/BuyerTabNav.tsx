@@ -1,9 +1,9 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HomeScreen from '../screens/buyer/BuyerHomeScreen';
-import CartScreen from '../screens/buyer/CartScreen';
+import CartScreen from '../screens/buyer/BuyerCartScreen';
 import ChatScreen from '../screens/common/ChatScreen';
-import OrderScreen from '../screens/buyer/OrderScreen';
+import OrderScreen from '../screens/buyer/BuyerOrderScreen';
 import { RouteProp } from '@react-navigation/native';
 import React from 'react';
 import Colors from '../context/colors';
@@ -59,7 +59,7 @@ const BuyerTabNav: React.FC = () => {
       <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
       <Tab.Screen name="Cart" component={CartScreen} options={{ headerShown: false }}/>
       <Tab.Screen name="Chat" component={ChatScreen} options={{ headerShown: false }}/>
-      <Tab.Screen name="Order" component={OrderScreen} />
+      <Tab.Screen name="Order" component={OrderScreen} options={{ headerShown: false }}/>
     </Tab.Navigator>
 
   );
