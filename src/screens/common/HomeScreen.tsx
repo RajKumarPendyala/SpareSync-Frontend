@@ -38,12 +38,30 @@ const categories = [
 const BuyerHomeScreen: React.FC = () => {
   const navigation = useNavigation<RootStackNavigationProp>();
   const [showMenu, setShowMenu] = useState(false);
+  const [role, setRole] = useState<null | string>(null);
   const { spareParts, setSpareParts } = useSpareParts(); // use context
-
 
     const fetchSpareParts = async () => {
       try {
           const token = await AsyncStorage.getItem('token');
+          const roleName = await AsyncStorage.getItem('role');
+          setRole(roleName);
+
+          if (roleName === 'seller') {
+            const response = await axios.get(
+              `http://${IP_ADDRESS}:3000/api/users/products/seller`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+console.log('daata',response);
+            setSpareParts(response.data.SpareParts || []);
+            return;
+          }
+
           const response = await axios.get(
             `http://${IP_ADDRESS}:3000/api/users/products/`,
             {
@@ -121,7 +139,7 @@ console.log('BuyerScreen.handleAddCart');
   };
 
   const handleCategoryPress = (item: any) => {
-    navigation.navigate('SpareParts', { gadgetType: item.value, name: item.name});
+    navigation.navigate('SpareParts', { gadgetType: item.value, name: item.name, roleName: role});
   };
 
 
@@ -130,9 +148,20 @@ console.log('BuyerScreen.handleAddCart');
 
       <View style={styles.header}>
         <Text style={styles.logo}>SpareSync</Text>
-        <TouchableOpacity style={styles.menuButton} onPress={() => {setShowMenu(true);}}>
-          <Icon name="account-circle" size={33} color={Colors.black} />
-        </TouchableOpacity>
+        {
+          role === 'seller' ?
+          (
+            <TouchableOpacity style={styles.menuButton} onPress={() => {navigation.navigate('AlertScreen');}}>
+              <Icon name="alert-circle" size={33} color={Colors.black} />
+            </TouchableOpacity>
+          )
+          :
+          (
+            <TouchableOpacity style={styles.menuButton} onPress={() => {setShowMenu(true);}}>
+              <Icon name="account-circle" size={33} color={Colors.black} />
+            </TouchableOpacity>
+          )
+        }
       </View>
 
       <View style={styles.line}/>
@@ -153,66 +182,100 @@ console.log('BuyerScreen.handleAddCart');
         </TouchableOpacity>
       </Modal>
 
-      <FlatList
-        data={categories}
-        numColumns={2}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.grid}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card} onPress={() => handleCategoryPress(item)}>
-            <Icon name={item.icon} size={36} color={Colors.primary} />
-            <Text style={styles.cardText}>{item.name}</Text>
-          </TouchableOpacity>
-        )}
-      />
+      <View>
+        <FlatList
+          data={categories}
+          numColumns={2}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.grid}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.card} onPress={() => handleCategoryPress(item)}>
+              <Icon name={item.icon} size={36} color={Colors.primary} />
+              <Text style={styles.cardText}>{item.name}</Text>
+            </TouchableOpacity>
+          )}
+        />
 
-      {
-        spareParts && spareParts.length > 0 ? (
-          <FlatList
-            data={spareParts}
-            numColumns={1}
-            keyExtractor={(item) => item._id}
-            renderItem={({ item }) => (
-              <Pressable onPress={() => navigation.navigate('BuyerProductDetails', { partId: item._id })} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
-                <View style={styles.card2}>
-                  <Image
-                    source={
-                      item?.images[0]?.path
-                        ? { uri: item?.images[0]?.path }
-                        : { uri: 'https://res.cloudinary.com/dxcbw424l/image/upload/v1749116154/rccjtgfk1lt74twuxo3b.jpg' }
-                    }
-                    style={styles.image}
-                    onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
-                  />
-                  <View style={styles.info}>
-                    <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-                    <Text style={styles.price}>₹{(
-                        parseFloat(item.price.$numberDecimal) *
-                        (1 - parseFloat(item.discount.$numberDecimal) / 100)
-                      ).toFixed(2)}
-                    </Text>
-                    {parseFloat(item.discount.$numberDecimal || '0') > 0 && (
-                      <>
-                        <Text style={styles.discount}>-{parseFloat(item.discount.$numberDecimal).toFixed(0)}%</Text>
-                      </>
-                    )}
-                    <View style={styles.ratingContainer}>
-                      <Icon name="star" size={16} color="#FFD700" />
-                      <Text style={styles.ratingText}>{item.averageRating}</Text>
+        {
+          spareParts && spareParts.length > 0 ? (
+            <FlatList
+              data={spareParts}
+              numColumns={1}
+              keyExtractor={(item) => item._id}
+              contentContainerStyle={styles.grid2}
+              renderItem={({ item }) => (
+                <Pressable onPress={() => navigation.navigate('BuyerProductDetails', { partId: item._id, roleName: role })} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
+                  <View style={styles.card2}>
+                    <Image
+                      source={
+                        item?.images[0]?.path
+                          ? { uri: item?.images[0]?.path }
+                          : { uri: 'https://res.cloudinary.com/dxcbw424l/image/upload/v1749116154/rccjtgfk1lt74twuxo3b.jpg' }
+                      }
+                      style={styles.image}
+                      onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
+                    />
+                    <View style={styles.info}>
+                      <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
+                      <Text style={styles.price}>₹{(
+                          parseFloat(item.price.$numberDecimal) *
+                          (1 - parseFloat(item.discount.$numberDecimal) / 100)
+                        ).toFixed(2)}
+                      </Text>
+                      {parseFloat(item.discount.$numberDecimal || '0') > 0 && (
+                        <>
+                          <Text style={styles.discount}>-{parseFloat(item.discount.$numberDecimal).toFixed(0)}%</Text>
+                        </>
+                      )}
+                      <View style={styles.ratingContainer}>
+                        <Icon name="star" size={16} color="#FFD700" />
+                        <Text style={styles.ratingText}>{item.averageRating}</Text>
+                      </View>
                     </View>
+                    {
+                      role === 'buyer' ?
+                      (
+                        item.quantity >= 1 ?
+                        (
+                          <TouchableOpacity style={styles.cart} onPress={() => handleAddCart(item)}>
+                            <Icon name="cart" size={33} color={Colors.primary} />
+                          </TouchableOpacity>
+                        )
+                        :
+                        ''
+                      )
+                      :
+                      (
+                        <TouchableOpacity style={styles.cart}
+                        onPress={() => navigation.navigate('EditProductScreen', { sparePartId: item._id })}
+                        >
+                          <Icon name="pencil" size={30} color={Colors.primary} />
+                        </TouchableOpacity>
+                      )
+                    }
                   </View>
-                  <TouchableOpacity style={styles.cart} onPress={() => handleAddCart(item)}>
-                    <Icon name="cart" size={33} color={Colors.primary} />
-                  </TouchableOpacity>
-                </View>
-              </Pressable>
-            )}
-          />
-        ) : (
-          <Text style={styles.noItemsText}>There are no items available right now.</Text>
+                </Pressable>
+              )}
+            />
+          ) : (
+            <View style={styles.centered}>
+              <Text style={styles.emptyText}>There are no items available right now.</Text>
+            </View>
+          )
+        }
+      </View>
+      {
+        role === 'buyer' ? ''
+        :
+        (
+          <TouchableOpacity
+            style={styles.floatingAddIcon}
+            onPress={() => navigation.navigate('AddProductScreen')}
+          >
+            <Icon name="plus" size={24} color="white" />
+          </TouchableOpacity>
         )
       }
-
     </View>
   );
 };
@@ -222,16 +285,18 @@ const styles = StyleSheet.create({
     height:2,
     backgroundColor: Colors.primary,
   },
-  noItemsText: {
-    textAlign: 'center',
-    marginTop: 20,
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
     fontSize: 16,
-    color: '#666',
+    color: Colors.black,
   },
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    // paddingTop: 15,
     paddingTop: 30,
   },
   header: {
@@ -269,8 +334,12 @@ const styles = StyleSheet.create({
   },
   grid: {
     alignItems: 'center',
-    paddingVertical: 10,
-    marginBottom: 120,
+    marginTop: 10,
+    marginBottom: -15,
+    paddingBottom: 15,
+  },
+  grid2: {
+    paddingBottom: 447,
   },
   card: {
     backgroundColor: Colors.secondaryButtonBG,
@@ -335,6 +404,20 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     marginBottom: 20,
     marginRight: 20,
+  },
+  floatingAddIcon: {
+    position: 'absolute',
+    right: 35,
+    bottom: 110,
+    backgroundColor: Colors.primary,
+    borderRadius: 30,
+    padding: 14,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    zIndex: 10,
   },
 });
 

@@ -64,27 +64,45 @@ const ChatDetailScreen = () => {
   );
 
   const handleDelete = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await axios.patch(
-        `http://${IP_ADDRESS}:3000/api/users/conversations`,
-        { id: otherParticipant._id },
+    Alert.alert(
+      'Confirm Delete',
+      'Delete conversation from you and others?',
+      [
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
+          text: 'No',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('token');
+              const response = await axios.patch(
+                `http://${IP_ADDRESS}:3000/api/users/conversations`,
+                { id: otherParticipant._id },
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              );
+
+              navigation.goBack();
+
+              if (response.data.message) {
+                Alert.alert('Success','Conversation deleted successfully!');
+              }
+            } catch (error: any) {
+              console.error('Error removing conversation:', error?.response?.data || error.message);
+              Alert.alert('Failed to remove conversation.');
+            }
           },
-        }
-      );
-
-      navigation.goBack();
-
-      if (response.data.message) {
-        Alert.alert('Success','Conversation removed from chat successfully!');
-      }
-    } catch (error: any) {
-      console.error('Error removing conversation:', error?.response?.data || error.message);
-      Alert.alert('Failed to remove conversation.');
-    }
+          style: 'destructive',
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
 

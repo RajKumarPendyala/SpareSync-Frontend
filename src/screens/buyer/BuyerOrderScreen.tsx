@@ -6,17 +6,23 @@ import {
   FlatList,
   ActivityIndicator,
   Alert,
+  Pressable,
 } from 'react-native';
 import axios from 'axios';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StackParamList } from '../../navigation/StackNavigator';
+import { StackNavigationProp } from '@react-navigation/stack';
 import Colors from '../../context/colors';
 import { IP_ADDRESS } from '@env';
 
+type  BuyerOrderScreenNavigationProp = StackNavigationProp<StackParamList, 'BuyerTabNav'>;
 
 const BuyerOrderScreen: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const navigation = useNavigation<BuyerOrderScreenNavigationProp>();
 
   const fetchOrders = async () => {
     try {
@@ -48,47 +54,53 @@ const BuyerOrderScreen: React.FC = () => {
 
     return (
       <View style={styles.card}>
-
-        <View style={styles.headerRow}>
-          <Text style={styles.orderId}>Order #{item._id.slice(-6).toUpperCase()}</Text>
-          <Text style={[styles.status, getStatusStyle(item.shipmentStatus)]}>
-            {item.shipmentStatus.toUpperCase()}
-          </Text>
-        </View>
-        <Text style={styles.date}>Placed on: {createdAt}</Text>
-
-        <View style={styles.tableHeader}>
-          <Text style={[styles.tableText, styles.itemCol]}>Item</Text>
-          <Text style={[styles.tableText, styles.qtyCol]}>Qty</Text>
-          <Text style={[styles.tableText, styles.priceCol]}>Price</Text>
-        </View>
-
-        {item.items.map((itm: any, idx: number) => (
-          <View key={idx} style={styles.tableRow}>
-            <Text style={[styles.tableValue, styles.itemCol]}>{itm.sparePartId?.name}</Text>
-            <Text style={[styles.tableValue, styles.qtyCol]}>{itm.quantity}</Text>
-            <Text style={[styles.tableValue, styles.priceCol]}>
-              ₹{parseFloat(itm.subTotal?.$numberDecimal || '0').toFixed(2)}
+        <Pressable
+          onPress={() => navigation.navigate('OrderDetailScreen', { OrderObject: item })}
+          style={({ pressed }) => [
+            pressed && { opacity: 0.9 },
+          ]}
+        >
+          <View style={styles.headerRow}>
+            <Text style={styles.orderId}>Order #{item._id.slice(-6).toUpperCase()}</Text>
+            <Text style={[styles.status, getStatusStyle(item.shipmentStatus)]}>
+              {item.shipmentStatus.toUpperCase()}
             </Text>
           </View>
-        ))}
+          <Text style={styles.date}>Placed on: {createdAt}</Text>
 
-        <View style={styles.divider} />
+          <View style={styles.tableHeader}>
+            <Text style={[styles.tableText, styles.itemCol]}>Item</Text>
+            <Text style={[styles.tableText, styles.qtyCol]}>Qty</Text>
+            <Text style={[styles.tableText, styles.priceCol]}>Price</Text>
+          </View>
 
-        <View style={styles.totalRow}>
-          <Text style={styles.label}>Total</Text>
-          <Text style={styles.value}>₹{total}</Text>
-        </View>
-        <View style={styles.totalRow}>
-          <Text style={styles.label}>Discount</Text>
-          <Text style={[styles.value, styles.discountValue]}>₹{discount}</Text>
-        </View>
-        <View style={styles.totalRow}>
-          <Text style={styles.labelBold}>Paid</Text>
-          <Text style={styles.valueBold}>₹{finalAmount}</Text>
-        </View>
+          {item.items.map((itm: any, idx: number) => (
+            <View key={idx} style={styles.tableRow}>
+              <Text style={[styles.tableValue, styles.itemCol]}>{itm.sparePartId?.name}</Text>
+              <Text style={[styles.tableValue, styles.qtyCol]}>{itm.quantity}</Text>
+              <Text style={[styles.tableValue, styles.priceCol]}>
+                ₹{parseFloat(itm.subTotal?.$numberDecimal || '0').toFixed(2)}
+              </Text>
+            </View>
+          ))}
 
-        <Text style={styles.paymentInfo}>Paid via {item.paymentMethod}</Text>
+          <View style={styles.divider} />
+
+          <View style={styles.totalRow}>
+            <Text style={styles.label}>Total</Text>
+            <Text style={styles.value}>₹{total}</Text>
+          </View>
+          <View style={styles.totalRow}>
+            <Text style={styles.label}>Discount</Text>
+            <Text style={[styles.value, styles.discountValue]}>₹{discount}</Text>
+          </View>
+          <View style={styles.totalRow}>
+            <Text style={styles.labelBold}>Paid</Text>
+            <Text style={styles.valueBold}>₹{finalAmount}</Text>
+          </View>
+
+          <Text style={styles.paymentInfo}>Paid via {item.paymentMethod}</Text>
+        </Pressable>
       </View>
     );
   };

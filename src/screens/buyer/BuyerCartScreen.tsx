@@ -16,6 +16,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useSpareParts } from '../../context/SparePartsContext';
 import Colors from '../../context/colors';
 import { IP_ADDRESS } from '@env';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -26,8 +27,10 @@ const { width } = Dimensions.get('window');
 
 const CartScreen: React.FC = () => {
   const navigation = useNavigation<RootStackNavigationProp>();
+    const { spareParts } = useSpareParts();
   const [cart, setCart] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [orderPlaceable, setOrderPlaceable] = useState(true);
 
 const handleDelete = async (item: any) => {
   try {
@@ -98,6 +101,12 @@ const handleDelete = async (item: any) => {
   };
 
   const handlePlaceOrder = async () => {
+    if (!orderPlaceable) {
+      Alert.alert('Warning', 'One or more products out of stock.');
+      setOrderPlaceable(true);
+      fetchCart();
+      return;
+    }
     try {
       const token = await AsyncStorage.getItem('token');
       console.log(token);
@@ -126,11 +135,12 @@ const handleDelete = async (item: any) => {
     const partName = typeof part === 'object' ? part?.name : 'Spare Part';
     const price = parseFloat(item.subTotal?.$numberDecimal || '0').toFixed(2);
     const discount = item.subTotalDiscount ? parseFloat(item.subTotalDiscount.$numberDecimal).toFixed(2) : null;
+    const product = spareParts.find((x: any) => x._id === part._id);
 
     return (
       <View style={styles.card}>
         <Pressable
-          onPress={() => navigation.navigate('BuyerProductDetails', { partId: item.sparePartId._id })}
+          onPress={() => navigation.navigate('BuyerProductDetails', { partId: item.sparePartId._id, roleName: null })}
           style={({ pressed }) => [
             { flexDirection: 'row', flex: 1, alignItems: 'center' },
             pressed && { opacity: 0.9 },
@@ -147,17 +157,26 @@ const handleDelete = async (item: any) => {
         />
           <View style={styles.details}>
             <Text style={styles.name}>{partName}</Text>
-            <View style={styles.priceDiscount}>
-              {parseFloat(discount || '0') > 0 && (
-                <>
-                  <Text style={styles.price}>₹{price}</Text>
-                </>
-              )}
-              <Text style={styles.discountPrice}>₹{(parseFloat(price) - parseFloat(discount || '0')).toFixed(2)}</Text>
-            </View>
-            {parseFloat(discount || '0') > 0 && (
+
+            {product.quantity >= item.quantity ? (
               <>
-                <Text style={styles.discount}>- ₹{discount} off</Text>
+                <View style={styles.priceDiscount}>
+                  {parseFloat(discount || '0') > 0 && (
+                    <Text style={styles.price}>₹{price}</Text>
+                  )}
+                  <Text style={styles.discountPrice}>
+                    ₹{(parseFloat(price) - parseFloat(discount || '0')).toFixed(2)}
+                  </Text>
+                </View>
+
+                {parseFloat(discount || '0') > 0 && (
+                  <Text style={styles.discount}>- ₹{discount} off</Text>
+                )}
+              </>
+            ) : (
+              <>
+                <Text style={styles.outOfStock}>Out of Stock</Text>
+                {setOrderPlaceable(false)}
               </>
             )}
           </View>
@@ -191,10 +210,10 @@ const handleDelete = async (item: any) => {
 
             <TouchableOpacity
               onPress={() => updateQuantity(item, item.quantity + 1)}
-              disabled={item.quantity >= 10}
+              disabled={item.quantity >= 5 || product.quantity <= item.quantity}
               style={[
                 styles.quantityButton,
-                item.quantity >= 10 && styles.disabledButton,
+                (item.quantity >= 5 || product.quantity <= item.quantity) && styles.disabledButton,
               ]}
             >
               {
@@ -383,6 +402,11 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     gap: 15,
     alignItems: 'center',
+  },
+  outOfStock: {
+    color: 'red',
+    fontWeight: '600',
+    marginTop: 4,
   },
 });
 

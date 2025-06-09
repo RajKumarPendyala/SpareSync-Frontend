@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, FlatList, Text, TouchableOpacity, Image, StyleSheet, Dimensions, Alert, Modal, Pressable } from 'react-native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { IP_ADDRESS } from '@env';
@@ -11,20 +12,15 @@ import Colors from '../../context/colors';
 
 const { width } = Dimensions.get('window');
 
+type SparePartsRouteProp = RouteProp<StackParamList, 'SpareParts'>;
 type SparePartsScreenNavigationProp = StackNavigationProp<StackParamList, 'SpareParts'>;
 
-interface Props {
-  navigation: SparePartsScreenNavigationProp;
-  route: {
-    params: {
-      gadgetType: string;
-    };
-  };
-}
+const SparePartsScreen: React.FC = () => {
+  const navigation = useNavigation<SparePartsScreenNavigationProp>();
+  const route = useRoute<SparePartsRouteProp>();
 
+  const { gadgetType, roleName } = route.params;
 
-const SparePartsScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { gadgetType } = route.params;
 
   const { spareParts } = useSpareParts();
 
@@ -104,7 +100,7 @@ console.log('SparePartsScreen.handleAddCart');
             data={filteredParts}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => (
-              <Pressable onPress={() => navigation.navigate('BuyerProductDetails', { partId: item._id })} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
+              <Pressable onPress={() => navigation.navigate('BuyerProductDetails', { partId: item._id, roleName: null })} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
                 <View style={styles.card2}>
                   <Image
                     source={
@@ -128,15 +124,35 @@ console.log('SparePartsScreen.handleAddCart');
                       <Text style={styles.ratingText}>{item.averageRating}</Text>
                     </View>
                   </View>
-                  <TouchableOpacity style={styles.cart} onPress={() => handleAddCart(item)}>
-                    <Icon name="cart" size={33} color={Colors.primary} />
-                  </TouchableOpacity>
+                    {
+                      roleName === 'buyer' ?
+                      (
+                        item.quantity >= 1 ?
+                        (
+                          <TouchableOpacity style={styles.cart} onPress={() => handleAddCart(item)}>
+                            <Icon name="cart" size={33} color={Colors.primary} />
+                          </TouchableOpacity>
+                        )
+                        :
+                        ''
+                      )
+                      :
+                      (
+                        <TouchableOpacity style={styles.cart}
+                        onPress={() => navigation.navigate('EditProductScreen', { sparePartId: item._id })}
+                        >
+                          <Icon name="pencil" size={30} color={Colors.primary} />
+                        </TouchableOpacity>
+                      )
+                    }
                 </View>
               </Pressable>
             )}
           />
         ) : (
-          <Text style={styles.noItemsText}>There are no items available right now.</Text>
+          <View style={styles.centered}>
+            <Text style={styles.emptyText}>There are no items available right now.</Text>
+          </View>
         )
       }
 
@@ -192,6 +208,18 @@ console.log('SparePartsScreen.handleAddCart');
           </View>
         </View>
       </Modal>
+      {
+        roleName === 'buyer' ? ''
+        :
+        (
+          <TouchableOpacity
+            style={styles.floatingAddIcon}
+            onPress={() => navigation.navigate('AddProductScreen')}
+          >
+            <Icon name="plus" size={24} color="white" />
+          </TouchableOpacity>
+        )
+      }
     </View>
   );
 };
@@ -202,11 +230,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     paddingTop: 8,
   },
-  noItemsText: {
-    textAlign: 'center',
-    marginTop: 20,
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
     fontSize: 16,
-    color: '#666',
+    color: Colors.black,
   },
   card2: {
     flexDirection: 'row',
@@ -318,6 +349,20 @@ const styles = StyleSheet.create({
     color: Colors.secondary,
     right: 30,
     zIndex: 1,
+  },
+  floatingAddIcon: {
+    position: 'absolute',
+    right: 35,
+    bottom: 150,
+    backgroundColor: Colors.primary,
+    borderRadius: 30,
+    padding: 14,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    zIndex: 10,
   },
 });
 

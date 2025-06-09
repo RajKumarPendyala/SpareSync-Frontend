@@ -8,6 +8,8 @@ import {
   ScrollView,
   Text,
   Alert,
+  View,
+  Modal,
 } from 'react-native';
 import { useProfile } from '../../context/ProfileContext';
 import axios from 'axios';
@@ -29,13 +31,16 @@ interface Props {
 const ProfileScreen: React.FC<Props> = ({ navigation }) => {
 
   const { profile, setProfile } = useProfile();
+  const [role, setRole] = useState<string | null>(null);
   const [editable, setEditable] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [url, setUrl] = useState('');
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
+        setRole(await AsyncStorage.getItem('role'));
 
         const response = await axios.get(
           `http://${IP_ADDRESS}:3000/api/users/profile`,
@@ -69,6 +74,30 @@ console.log(response);
     fetchProfile();
   }, [setProfile]);
 
+  const handleLogout = async () => {
+    Alert.alert(
+      'Confirm Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          onPress: async () => {
+            await AsyncStorage.removeItem('token');
+            await AsyncStorage.removeItem('role');
+            setShowMenu(false);
+            navigation.replace('Login');
+          },
+          style: 'destructive',
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   const handleImageUpload = async () => {
     const imageUrl = await pickAndUploadImage();
@@ -140,6 +169,35 @@ console.log(response);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+
+      {
+        role === 'seller' ?
+        (
+          <View style={styles.header}>
+            <TouchableOpacity
+            onPress={() => {setShowMenu(true);}}
+            >
+              <Icon name="dots-vertical" size={30} color={Colors.black} />
+            </TouchableOpacity>
+          </View>
+        )
+        :
+        ''
+      }
+
+      <Modal visible={showMenu} transparent>
+        <TouchableOpacity style={styles.modalOverlay} onPress={() => setShowMenu(false)}>
+          <View style={styles.dropdown}>
+            <TouchableOpacity onPress={() => { setShowMenu(false); navigation.navigate('Wallet'); }}>
+              <Text style={styles.dropdownItem}><Icon name="wallet-outline" size={16} color={Colors.primary} />   Wallet</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleLogout}>
+              <Text style={[styles.dropdownItem, { color: Colors.secondary }]}><Icon name="logout" size={16} color={Colors.secondary} />   Logout</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       <Image
         source={
           profile?.image?.path
@@ -259,6 +317,29 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     color: '#000',
     fontSize: 16,
+  },
+  header: {
+    alignItems: 'flex-end',
+    paddingHorizontal: 10,
+    paddingTop: 15,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    padding: 20,
+  },
+  dropdown: {
+    backgroundColor: Colors.primaryButtonBG,
+    padding: 13,
+    borderRadius: 12,
+    width: 120,
+  },
+  dropdownItem: {
+    fontSize: 16,
+    marginVertical: 5,
+    color: Colors.primary,
   },
 });
 

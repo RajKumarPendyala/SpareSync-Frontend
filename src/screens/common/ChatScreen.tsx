@@ -121,11 +121,22 @@ console.log('conversation response: ',response);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Chats</Text>
-      <FlatList
-        data={conversations}
-        keyExtractor={(item) => item._id}
-        renderItem={renderItem}
-      />
+      {
+        conversations.length === 0 ?
+        (
+          <View style={styles.centered}>
+            <Text style={styles.emptyText}>Your chat is empty.</Text>
+          </View>
+        )
+        :
+        (
+          <FlatList
+            data={conversations}
+            keyExtractor={(item) => item._id}
+            renderItem={renderItem}
+          />
+        )
+      }
     </View>
   );
 };
@@ -173,6 +184,15 @@ const styles = StyleSheet.create({
     color: Colors.icon,
     alignSelf: 'flex-start',
     textAlignVertical: 'top',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: Colors.black,
   },
 });
 

@@ -32,14 +32,16 @@ interface Props {
   route: {
     params: {
       partId: string;
+      roleName: string | null;
     };
   };
 }
 
 const BuyerProductDetailsScreen: React.FC<Props> = ({ route }) => {
-  const { partId } = route.params;
+  const { partId, roleName } = route.params;
 console.log(partId);
-  const { spareParts } = useSpareParts();
+    const { spareParts, setSpareParts } = useSpareParts();
+
   const navigation = useNavigation<BuyerProductDetailsScreenNavigationProp>();
 
   const product = spareParts.find((item: any) => item._id === partId);
@@ -99,6 +101,48 @@ console.log('SparePartsScreen.handleAddCart');
       console.error('Error adding to cart:', error?.response?.data || error.message);
       Alert.alert('Failed to add item to cart.');
     }
+  };
+
+  const handleDelete = async (item: any) => {
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete product?',
+      [
+        {
+          text: 'No',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('token');
+
+              const response = await axios.patch(
+                `http://${IP_ADDRESS}:3000/api/users/products/seller`,
+                { _id: item._id, isDeleted: true },
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              );
+              if (response.status === 200) {
+                setSpareParts((prevParts: any) => prevParts.filter((part: any) => part._id !== item._id));
+                Alert.alert('Success', 'Product deleted successfully');
+                navigation.goBack();
+              }
+            } catch (error: any) {
+              console.error('Error deleting product:', error?.response?.data || error.message);
+              Alert.alert('Failed to delete product.');
+            }
+          },
+          style: 'destructive',
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
 
@@ -217,16 +261,49 @@ console.log('SparePartsScreen.handleAddCart');
         </View>
       </ScrollView>
 
-      <TouchableOpacity
-        style={styles.floatingChatIcon}
-        onPress={() => handleChatOption()}
-      >
-        <Icon name="comments" size={24} color="white" />
-      </TouchableOpacity>
+      {
+        roleName === 'buyer' ?
+        (
+          <TouchableOpacity
+            style={styles.floatingChatIcon}
+            onPress={() => handleChatOption()}
+          >
+            <Icon name="comments" size={24} color="white" />
+          </TouchableOpacity>
+        )
+        :
+        (
+          <TouchableOpacity style={styles.floatingChatIcon}
+            onPress={() => navigation.navigate('EditProductScreen', { sparePartId: product._id })}
+          >
+            <Icon name="pencil" size={25} color="white" />
+          </TouchableOpacity>
+        )
+      }
 
-      <TouchableOpacity style={styles.cartButton} onPress={() => handleAddCart(product)}>
-        <Text style={styles.cartButtonText}>Add to Cart</Text>
-      </TouchableOpacity>
+      {
+        roleName === 'buyer' ?
+        (
+          product.quantity >= 1 ?
+          (
+            <TouchableOpacity style={styles.cartButton} onPress={() => handleAddCart(product)}>
+              <Text style={styles.cartButtonText}>Add to Cart</Text>
+            </TouchableOpacity>
+          )
+          :
+          (
+            <View style={styles.stockButton}>
+              <Text style={styles.cartButtonText}>Out of Stock</Text>
+            </View>
+          )
+        )
+        :
+        (
+          <TouchableOpacity style={styles.stockButton} onPress={() => handleDelete(product)}>
+            <Text style={styles.cartButtonText}>Delete The Product</Text>
+          </TouchableOpacity>
+        )
+      }
     </View>
   );
 };
@@ -365,6 +442,11 @@ const styles = StyleSheet.create({
   },
   cartButton: {
     backgroundColor: Colors.primary,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  stockButton: {
+    backgroundColor: Colors.secondary,
     paddingVertical: 14,
     alignItems: 'center',
   },

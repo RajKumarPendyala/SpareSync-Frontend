@@ -6,12 +6,17 @@ import OnBoardingScreen from '../screens/auth/OnBoardingScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 import PasswordResetScreen from '../screens/auth/PasswordResetScreen';
 import TermsAndConditionsScreen from '../screens/auth/TermsAndConditionsScreen';
-import SparePartsScreen from '../screens/buyer/BuyerSparePartsScreen';
+import SparePartsScreen from '../screens/common/SparePartsScreen';
 import ProfileScreen from '../screens/common/ProfileScreen';
-import WalletScreen from '../screens/buyer/WalletScreen';
+import WalletScreen from '../screens/common/WalletScreen';
 import ChangePasswordScreen from '../screens/common/ChangePasswordScreen';
-import BuyerProductDetailsScreen from '../screens/buyer/BuyerProductDetailsScreen';
+import ProductDetailsScreen from '../screens/common/ProductDetailsScreen';
 import ChatDetailScreen from '../screens/common/ChatDetailScreen';
+import BuyerOrderDetailScreen from '../screens/buyer/BuyerOrderDetailScreen';
+import BuyerReviewScreen from '../screens/buyer/BuyerReviewScreen';
+import SellerAddProductScreen from '../screens/seller/SellerAddProductScreen';
+import EditProductScreen from '../screens/common/EditProductScreen';
+import SellerAlertScreen from '../screens/seller/SellerAlertScreen';
 import Colors from '../context/colors';
 import BuyerTabNav from './BuyerTabNav';
 import SellerTabNav from './SellerTabNav';
@@ -28,12 +33,17 @@ export type StackParamList = {
     AdminTabNav: undefined;
     Terms: undefined;
     PasswordReset: { email: string};
-    SpareParts: {gadgetType: string, name: string};
+    SpareParts: {gadgetType: string, name: string, roleName: string | null};
     Wallet: undefined;
     Profile: undefined;
     ChangePassword: undefined;
-    BuyerProductDetails: { partId: string };
+    BuyerProductDetails: { partId: string, roleName: string | null };
     ChatDetail: { conversationId: string };
+    OrderDetailScreen: { OrderObject: any};
+    ReviewScreen: {sparePartId: string};
+    EditProductScreen: {sparePartId: string};
+    AddProductScreen: undefined;
+    AlertScreen: undefined;
 };
 
 const Stack = createStackNavigator<StackParamList>();
@@ -58,14 +68,19 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Personas" component={PersonasScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Terms" component={TermsAndConditionsScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="BuyerProductDetails" component={BuyerProductDetailsScreen}  options={{ headerShown: false }}/>
+            <Stack.Screen name="BuyerProductDetails" component={ProductDetailsScreen}  options={{ headerShown: false }}/>
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
             <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
             <Stack.Screen name="PasswordReset" component={PasswordResetScreen} options={{ headerShown: false }}/>
             <Stack.Screen name="BuyerTabNav" component={BuyerTabNav} options={{ headerShown: false }}  />
             <Stack.Screen name="AdminTabNav" component={AdminTabNav} options={{ headerShown: false }}  />
             <Stack.Screen name="SellerTabNav" component={SellerTabNav} options={{ headerShown: false }} />
+            <Stack.Screen name="OrderDetailScreen" component={BuyerOrderDetailScreen} options={{headerShown: false}} />
             <Stack.Screen name="ChatDetail" component={ChatDetailScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="ReviewScreen" component={BuyerReviewScreen} options={{ headerShown: true, title: 'Review' }} />
+            <Stack.Screen name="AddProductScreen" component={SellerAddProductScreen} options={{ headerShown: false}}/>
+            <Stack.Screen name="EditProductScreen" component={EditProductScreen} options={{ headerShown: true, title: 'Edit Spare Part'}}/>
+            <Stack.Screen name="AlertScreen" component={SellerAlertScreen} options={{ headerShown: true, title: 'Low Stock Products'}}/>
             <Stack.Screen name="SpareParts"
                 component={SparePartsScreen}
                 options={({ route }) => ({
