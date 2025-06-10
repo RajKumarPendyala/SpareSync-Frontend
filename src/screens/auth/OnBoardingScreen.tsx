@@ -29,6 +29,7 @@ const OnBoardingScreen: React.FC<Props> = ({ navigation }) => {
     const checkLoginStatus = async () => {
       try {
         const userData = await AsyncStorage.getItem('token');
+        // await AsyncStorage.removeItem('role');
         const role = await AsyncStorage.getItem('role');
         setUserRole(role);
         setIsLoggedIn(!!userData);

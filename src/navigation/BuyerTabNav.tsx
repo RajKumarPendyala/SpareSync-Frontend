@@ -3,7 +3,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HomeScreen from '../screens/common/HomeScreen';
 import CartScreen from '../screens/buyer/BuyerCartScreen';
 import ChatScreen from '../screens/common/ChatScreen';
-import OrderScreen from '../screens/buyer/BuyerOrderScreen';
+import OrderScreen from '../screens/common/OrderScreen';
 import { RouteProp } from '@react-navigation/native';
 import React from 'react';
 import Colors from '../context/colors';

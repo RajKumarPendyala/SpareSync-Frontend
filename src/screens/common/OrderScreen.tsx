@@ -21,17 +21,40 @@ type  BuyerOrderScreenNavigationProp = StackNavigationProp<StackParamList, 'Buye
 const BuyerOrderScreen: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+
 
   const navigation = useNavigation<BuyerOrderScreenNavigationProp>();
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (status: string = 'all') => {
     try {
+      setLoading(true);
       const token = await AsyncStorage.getItem('token');
-      const res = await axios.get(`http://${IP_ADDRESS}:3000/api/users/orders`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log(res);
-      setOrders(res.data.orders);
+      const role = await AsyncStorage.getItem('role');
+
+      if (role === 'admin') {
+        const url = status === 'all'
+        ? `http://${IP_ADDRESS}:3000/api/users/orders/admin`
+        : `http://${IP_ADDRESS}:3000/api/users/orders/admin?status=${status}`;
+
+        const res = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        console.log('admin: ',res);
+        setOrders(res.data.orders);
+      }else {
+        const url = status === 'all'
+        ? `http://${IP_ADDRESS}:3000/api/users/orders`
+        : `http://${IP_ADDRESS}:3000/api/users/orders?status=${status}`;
+
+        const res = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        console.log(res);
+        setOrders(res.data.orders);
+      }
     } catch (error: any) {
       console.error('Error fetching orders:', error?.response?.data || error.message);
       Alert.alert('Failed to fetch orders');
@@ -42,8 +65,8 @@ const BuyerOrderScreen: React.FC = () => {
 
   useFocusEffect(
     useCallback(() => {
-      fetchOrders();
-    }, [])
+      fetchOrders(selectedStatus);
+    }, [selectedStatus])
   );
 
   const renderItem = ({ item }: any) => {
@@ -118,22 +141,48 @@ const BuyerOrderScreen: React.FC = () => {
     return <ActivityIndicator size="large" color={Colors.primary} style={styles.loadingIndicator} />;
   }
 
-  if (!orders || orders.length === 0) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.emptyText}>No orders found.</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
        <Text style={styles.title}>Orders</Text>
-      <FlatList
-        data={orders}
-        keyExtractor={(item) => item._id}
-        renderItem={renderItem}
-      />
+
+       <View style={styles.filterContainer}>
+        {['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => (
+          <Pressable
+            key={status}
+            onPress={() => setSelectedStatus(status)}
+            style={[
+              styles.statusButton,
+              selectedStatus === status && styles.statusButtonActive,
+            ]}
+          >
+            <Text
+              style={[
+                styles.statusButtonText,
+                selectedStatus === status && styles.statusButtonTextActive,
+              ]}
+            >
+              {status.toUpperCase()}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {
+        !orders || orders.length === 0 ?
+        (
+          <View style={styles.centered}>
+            <Text style={styles.emptyText}>No orders found.</Text>
+          </View>
+        )
+        :
+        (
+          <FlatList
+            data={orders}
+            keyExtractor={(item) => item._id}
+            renderItem={renderItem}
+          />
+        )
+      }
     </View>
   );
 };
@@ -259,6 +308,33 @@ const styles = StyleSheet.create({
   },
   loadingIndicator: {
     flex: 1,
+  },
+
+  filterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginHorizontal: 10,
+    marginBottom: 10,
+  },
+  statusButton: {
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    margin: 4,
+  },
+  statusButtonActive: {
+    backgroundColor: Colors.primary,
+  },
+  statusButtonText: {
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: '500',
+  },
+  statusButtonTextActive: {
+    color: 'white',
   },
 });
 

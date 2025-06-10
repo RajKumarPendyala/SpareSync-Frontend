@@ -146,25 +146,32 @@ console.log('BuyerScreen.handleAddCart');
   return (
     <View style={styles.container}>
 
-      <View style={styles.header}>
-        <Text style={styles.logo}>SpareSync</Text>
-        {
-          role === 'seller' ?
-          (
-            <TouchableOpacity style={styles.menuButton} onPress={() => {navigation.navigate('AlertScreen');}}>
-              <Icon name="alert-circle" size={33} color={Colors.black} />
-            </TouchableOpacity>
-          )
-          :
-          (
-            <TouchableOpacity style={styles.menuButton} onPress={() => {setShowMenu(true);}}>
-              <Icon name="account-circle" size={33} color={Colors.black} />
-            </TouchableOpacity>
-          )
-        }
-      </View>
+      {
+        role === 'admin' ?
+        ('') :
+        (
+          <View style={styles.header}>
+            <Text style={styles.logo}>SpareSync</Text>
+            {
+              role === 'seller' ?
+              (
+                <TouchableOpacity style={styles.menuButton} onPress={() => {navigation.navigate('AlertScreen');}}>
+                  <Icon name="alert-circle" size={33} color={Colors.black} />
+                </TouchableOpacity>
+              )
+              :
+              (
+                <TouchableOpacity style={styles.menuButton} onPress={() => {setShowMenu(true);}}>
+                  <Icon name="account-circle" size={33} color={Colors.black} />
+                </TouchableOpacity>
+              )
+            }
+          </View>
+        )
+      }
 
       <View style={styles.line}/>
+
 
       <Modal visible={showMenu} transparent>
         <TouchableOpacity style={styles.modalOverlay} onPress={() => setShowMenu(false)}>
@@ -246,11 +253,14 @@ console.log('BuyerScreen.handleAddCart');
                       )
                       :
                       (
-                        <TouchableOpacity style={styles.cart}
-                        onPress={() => navigation.navigate('EditProductScreen', { sparePartId: item._id })}
-                        >
-                          <Icon name="pencil" size={30} color={Colors.primary} />
-                        </TouchableOpacity>
+                        role === 'seller' ?
+                        (
+                          <TouchableOpacity style={styles.cart}
+                          onPress={() => navigation.navigate('EditProductScreen', { sparePartId: item._id })}
+                          >
+                            <Icon name="pencil" size={30} color={Colors.primary} />
+                          </TouchableOpacity>
+                        ) : ('')
                       )
                     }
                   </View>
@@ -265,8 +275,7 @@ console.log('BuyerScreen.handleAddCart');
         }
       </View>
       {
-        role === 'buyer' ? ''
-        :
+        role === 'seller' ?
         (
           <TouchableOpacity
             style={styles.floatingAddIcon}
@@ -274,7 +283,7 @@ console.log('BuyerScreen.handleAddCart');
           >
             <Icon name="plus" size={24} color="white" />
           </TouchableOpacity>
-        )
+        ) : ('')
       }
     </View>
   );

@@ -12,7 +12,7 @@ import WalletScreen from '../screens/common/WalletScreen';
 import ChangePasswordScreen from '../screens/common/ChangePasswordScreen';
 import ProductDetailsScreen from '../screens/common/ProductDetailsScreen';
 import ChatDetailScreen from '../screens/common/ChatDetailScreen';
-import BuyerOrderDetailScreen from '../screens/buyer/BuyerOrderDetailScreen';
+import BuyerOrderDetailScreen from '../screens/common/OrderDetailScreen';
 import BuyerReviewScreen from '../screens/buyer/BuyerReviewScreen';
 import SellerAddProductScreen from '../screens/seller/SellerAddProductScreen';
 import EditProductScreen from '../screens/common/EditProductScreen';

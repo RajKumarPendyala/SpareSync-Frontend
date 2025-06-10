@@ -52,6 +52,7 @@ const SparePartsScreen: React.FC = () => {
 console.log('SparePartsScreen.handleAddCart');
 
       const token = await AsyncStorage.getItem('token');
+
       const response = await axios.post(
         `http://${IP_ADDRESS}:3000/api/users/cart/items/`,
         { sparePartId: item._id },
@@ -100,7 +101,7 @@ console.log('SparePartsScreen.handleAddCart');
             data={filteredParts}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => (
-              <Pressable onPress={() => navigation.navigate('BuyerProductDetails', { partId: item._id, roleName: null })} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
+              <Pressable onPress={() => navigation.navigate('BuyerProductDetails', { partId: item._id, roleName: roleName })} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
                 <View style={styles.card2}>
                   <Image
                     source={
@@ -138,11 +139,14 @@ console.log('SparePartsScreen.handleAddCart');
                       )
                       :
                       (
-                        <TouchableOpacity style={styles.cart}
-                        onPress={() => navigation.navigate('EditProductScreen', { sparePartId: item._id })}
-                        >
-                          <Icon name="pencil" size={30} color={Colors.primary} />
-                        </TouchableOpacity>
+                        roleName === 'seller' ?
+                        (
+                          <TouchableOpacity style={styles.cart}
+                          onPress={() => navigation.navigate('EditProductScreen', { sparePartId: item._id })}
+                          >
+                            <Icon name="pencil" size={30} color={Colors.primary} />
+                          </TouchableOpacity>
+                        ) : ('')
                       )
                     }
                 </View>
@@ -209,8 +213,7 @@ console.log('SparePartsScreen.handleAddCart');
         </View>
       </Modal>
       {
-        roleName === 'buyer' ? ''
-        :
+        roleName === 'seller' ?
         (
           <TouchableOpacity
             style={styles.floatingAddIcon}
@@ -218,7 +221,7 @@ console.log('SparePartsScreen.handleAddCart');
           >
             <Icon name="plus" size={24} color="white" />
           </TouchableOpacity>
-        )
+        ) : ('')
       }
     </View>
   );

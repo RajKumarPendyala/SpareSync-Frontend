@@ -144,6 +144,7 @@ console.log('SparePartsScreen.handleAddCart');
       { cancelable: true }
     );
   };
+console.log('role name: ',roleName);
 
 
   return (
@@ -273,11 +274,14 @@ console.log('SparePartsScreen.handleAddCart');
         )
         :
         (
-          <TouchableOpacity style={styles.floatingChatIcon}
+          roleName === 'seller' ?
+          (
+            <TouchableOpacity style={styles.floatingChatIcon}
             onPress={() => navigation.navigate('EditProductScreen', { sparePartId: product._id })}
-          >
-            <Icon name="pencil" size={25} color="white" />
-          </TouchableOpacity>
+            >
+              <Icon name="pencil" size={25} color="white" />
+            </TouchableOpacity>
+          ) : ('')
         )
       }
 
