@@ -155,7 +155,7 @@ console.log('BuyerScreen.handleAddCart');
             {
               role === 'seller' ?
               (
-                <TouchableOpacity style={styles.menuButton} onPress={() => {navigation.navigate('AlertScreen');}}>
+                <TouchableOpacity style={styles.menuButton} onPress={() => {navigation.navigate('AlertScreen', { roleName : role});}}>
                   <Icon name="alert-circle" size={33} color={Colors.black} />
                 </TouchableOpacity>
               )

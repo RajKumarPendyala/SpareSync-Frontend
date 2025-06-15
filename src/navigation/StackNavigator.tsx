@@ -17,6 +17,7 @@ import BuyerReviewScreen from '../screens/buyer/BuyerReviewScreen';
 import SellerAddProductScreen from '../screens/seller/SellerAddProductScreen';
 import EditProductScreen from '../screens/common/EditProductScreen';
 import SellerAlertScreen from '../screens/seller/SellerAlertScreen';
+import AdminUserDetailScreen from '../screens/admin/AdminUserDetailScreen';
 import Colors from '../context/colors';
 import BuyerTabNav from './BuyerTabNav';
 import SellerTabNav from './SellerTabNav';
@@ -39,11 +40,12 @@ export type StackParamList = {
     ChangePassword: undefined;
     BuyerProductDetails: { partId: string, roleName: string | null };
     ChatDetail: { conversationId: string };
-    OrderDetailScreen: { OrderObject: any};
+    OrderDetailScreen: { OrderObject: any, role: string | null};
     ReviewScreen: {sparePartId: string};
     EditProductScreen: {sparePartId: string};
     AddProductScreen: undefined;
-    AlertScreen: undefined;
+    AlertScreen: { roleName: string | null};
+    UserDetailScreen: { userObject: any };
 };
 
 const Stack = createStackNavigator<StackParamList>();
@@ -81,6 +83,7 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="AddProductScreen" component={SellerAddProductScreen} options={{ headerShown: false}}/>
             <Stack.Screen name="EditProductScreen" component={EditProductScreen} options={{ headerShown: true, title: 'Edit Spare Part'}}/>
             <Stack.Screen name="AlertScreen" component={SellerAlertScreen} options={{ headerShown: true, title: 'Low Stock Products'}}/>
+            <Stack.Screen name="UserDetailScreen" component={AdminUserDetailScreen} options={{ headerShown: true, title: 'User Details'}}/>
             <Stack.Screen name="SpareParts"
                 component={SparePartsScreen}
                 options={({ route }) => ({

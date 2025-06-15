@@ -1,6 +1,7 @@
 import { View, FlatList, Text, TouchableOpacity, Image, StyleSheet, Dimensions, Pressable } from 'react-native';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import { useSpareParts } from '../../context/SparePartsContext';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Colors from '../../context/colors';
@@ -18,6 +19,8 @@ const SellerAlertScreen: React.FC<Props> = ({ navigation }) => {
 
   const { spareParts } = useSpareParts();
   let filteredParts = spareParts.filter((part: any) => part.quantity <= 10);
+    const route = useRoute<RouteProp<StackParamList, 'AlertScreen'>>();
+    const { roleName } = route.params;
 
   return (
     <View style={styles.container}>
@@ -27,7 +30,7 @@ const SellerAlertScreen: React.FC<Props> = ({ navigation }) => {
             data={filteredParts}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => (
-              <Pressable onPress={() => navigation.navigate('BuyerProductDetails', { partId: item._id, roleName: null })} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
+              <Pressable onPress={() => navigation.navigate('BuyerProductDetails', { partId: item._id, roleName: roleName })} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
                 <View style={styles.card2}>
                   <Image
                     source={

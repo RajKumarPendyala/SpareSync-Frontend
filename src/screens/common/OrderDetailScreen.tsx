@@ -24,13 +24,15 @@ type RootStackNavigationProp = StackNavigationProp<StackParamList, 'BuyerTabNav'
 
 const BuyerOrderDetailScreen = () => {
   const [orderObject, setOrderObject] = useState<any>(null);
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState(orderObject?.shipmentStatus || '');
   const navigation = useNavigation<RootStackNavigationProp>();
   const route = useRoute<RouteProp<StackParamList, 'OrderDetailScreen'>>();
-  const { OrderObject } = route.params;
+  const { OrderObject, role } = route.params;
 
   useEffect(() => {
     setOrderObject(OrderObject);
-    console.log('orderObject',OrderObject);
+    setSelectedStatus(OrderObject.shipmentStatus);
   }, [OrderObject]);
 
   if (!orderObject) {
@@ -52,7 +54,7 @@ const BuyerOrderDetailScreen = () => {
     return (
       <View style={styles.card}>
         <Pressable
-          onPress={() => navigation.navigate('BuyerProductDetails', { partId: item.sparePartId._id, roleName: null })}
+          onPress={() => navigation.navigate('BuyerProductDetails', { partId: item.sparePartId._id, roleName: role })}
           style={({ pressed }) => [
             { flexDirection: 'row', flex: 1, alignItems: 'center' },
             pressed && { opacity: 0.9 },
@@ -84,7 +86,7 @@ const BuyerOrderDetailScreen = () => {
         <View style={styles.reviewOption}>
             <Text style={styles.quantityText}>{item.quantity}X</Text>
             {
-                orderObject.shipmentStatus === 'delivered' ?
+                orderObject.shipmentStatus === 'delivered' && role === 'buyer' ?
                     <TouchableOpacity
                         style={styles.reviewButton}
                         onPress={() =>
@@ -98,6 +100,36 @@ const BuyerOrderDetailScreen = () => {
         </View>
       </View>
     );
+  };
+
+  const handleStatusUpdate = async (newStatus: string) => {
+    if(orderObject.shipmentStatus === 'cancelled'){
+      return;
+    }
+    const orderId = orderObject._id;
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await axios.patch(
+        `http://${IP_ADDRESS}:3000/api/users/orders/admin`,
+        { orderId, shipmentStatus: newStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        setOrderObject((prev: any) => ({
+          ...prev,
+          shipmentStatus: newStatus,
+        }));
+        setSelectedStatus(newStatus);
+        Alert.alert('Success', `Order status updated to ${newStatus}`);
+      }
+    } catch (error: any) {
+      console.error('Status update error:', error?.response?.data || error.message);
+      Alert.alert('Failed to update status');
+    }
   };
 
   const handleCancelOrder = async () => {
@@ -150,6 +182,9 @@ const BuyerOrderDetailScreen = () => {
     );
   };
 
+
+  const statusOptions = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+
   const getStatusStyle = (status: string) => {
     switch (status.toLowerCase()) {
       case 'delivered': return { color: 'green' };
@@ -163,48 +198,114 @@ const BuyerOrderDetailScreen = () => {
   const discount = parseFloat(orderObject.discountAmount?.$numberDecimal || '0').toFixed(2);
 
   return (
-    <View style={styles.container}>
+    <View
+    style={[
+      styles.container,
+      role === 'buyer' && { paddingBottom: 70 }
+    ]}
+    >
         <View style={styles.orderSummaryCard}>
-            <Text style={styles.summaryHeader}>Order Summary</Text>
+          <Text style={styles.summaryHeader}>Order Summary</Text>
 
-            <View style={styles.summaryRow}>
-                <Text style={styles.label}>Order ID:</Text>
-                <Text style={styles.value}>{orderObject._id.slice(-6).toUpperCase()}</Text>
-            </View>
+          <View style={styles.summaryRow}>
+              <Text style={styles.label}>Order ID:</Text>
+              <Text style={styles.value}>{orderObject._id.slice(-6).toUpperCase()}</Text>
+          </View>
 
-            <View style={styles.summaryRow}>
-                <Text style={styles.label}>Placed On:</Text>
-                <Text style={styles.value}>{new Date(orderObject.createdAt).toLocaleDateString()}</Text>
-            </View>
+          <View style={styles.summaryRow}>
+              <Text style={styles.label}>Placed On:</Text>
+              <Text style={styles.value}>{new Date(orderObject.createdAt).toLocaleDateString()}</Text>
+          </View>
 
-            <View style={styles.summaryRow}>
-                <Text style={styles.label}>Paid Via:</Text>
-                <Text style={styles.value}>{orderObject.paymentMethod}</Text>
-            </View>
+          <View style={styles.summaryRow}>
+              <Text style={styles.label}>Payment Via:</Text>
+              <Text style={styles.value}>{orderObject.paymentMethod}</Text>
+          </View>
 
-            <View style={styles.summaryRow}>
+
+          {
+            role === 'admin' ?
+            (
+              <>
+                <Text style={styles.label}>Update Status:</Text>
+                <TouchableOpacity
+                  style={styles.dropdown}
+                  onPress={() => setShowStatusDropdown(!showStatusDropdown)}
+                >
+                  <Text style={[styles.dropdownText, getStatusStyle(orderObject.shipmentStatus)]}>
+                    {selectedStatus ? selectedStatus.toUpperCase() : 'Select Status'}
+                  </Text>
+                </TouchableOpacity>
+
+                {showStatusDropdown && (
+                  <View style={styles.dropdownList}>
+                    {statusOptions.map((status) => (
+                      <TouchableOpacity
+                        key={status}
+                        onPress={() => {
+                          setShowStatusDropdown(false);
+                          if (status !== selectedStatus) {
+                            handleStatusUpdate(status);
+                          }
+                        }}
+                        style={styles.dropdownItem}
+                      >
+                        <Text style={styles.dropdownItemText}>{status.toUpperCase()}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+
+
+
+                <View style={styles.divider} />
+
+                <View style={styles.summaryRow}>
+                    <Text style={styles.label}>Name:</Text>
+                    <Text style={styles.value}>{orderObject.userId?.name}</Text>
+                </View>
+
+                <View style={styles.summaryRow}>
+                    <Text style={styles.label}>Mobile:</Text>
+                    <Text style={styles.value}>{orderObject.userId?.phoneNumber}</Text>
+                </View>
+
+                <View style={styles.summaryRow}>
+                    <Text style={styles.label}>Email:</Text>
+                    <Text style={styles.value}>{orderObject.userId?.email}</Text>
+                </View>
+
+                <View style={styles.summaryRow}>
+                  <Text style={styles.label}>Address: </Text>
+                  <Text style={styles.address}>{orderObject?.userId?.address?.houseNo.trim() + ', ' + orderObject?.userId?.address?.street.trim() + ', ' + orderObject?.userId?.address?.city.trim() + ', ' + orderObject?.userId?.address?.state.trim() + ', ' +  orderObject?.userId?.address?.postalCode.trim() + '.'}</Text>
+                </View>
+              </>
+            )
+            :
+            (
+              <View style={styles.summaryRow}>
                 <Text style={styles.label}>Status:</Text>
-                <Text style={[styles.value, getStatusStyle(orderObject.shipmentStatus)]}>
-                {orderObject.shipmentStatus.toUpperCase()}
-                </Text>
-            </View>
+                <Text style={[styles.value, getStatusStyle(orderObject.shipmentStatus)]}>{orderObject.shipmentStatus.toUpperCase()}</Text>
+              </View>
+            )
+          }
 
-            <View style={styles.divider} />
+          <View style={styles.divider} />
 
-            <View style={styles.summaryRow}>
-                <Text style={styles.label}>Total:</Text>
-                <Text style={styles.value}>₹{total}</Text>
-            </View>
+          <View style={styles.summaryRow}>
+              <Text style={styles.label}>Total:</Text>
+              <Text style={styles.value}>₹{total}</Text>
+          </View>
 
-            <View style={styles.summaryRow}>
-                <Text style={styles.label}>Discount:</Text>
-                <Text style={[styles.value, styles.discountText]}>₹{discount}</Text>
-            </View>
+          <View style={styles.summaryRow}>
+              <Text style={styles.label}>Discount:</Text>
+              <Text style={[styles.value, styles.discountText]}>₹{discount}</Text>
+          </View>
 
-            <View style={styles.summaryRow}>
-                <Text style={styles.labelBold}>Paid:</Text>
-                <Text style={styles.paidText}>₹{(parseFloat(total) - parseFloat(discount)).toFixed(2)}</Text>
-            </View>
+          <View style={styles.summaryRow}>
+              <Text style={styles.labelBold}>Payable:</Text>
+              <Text style={styles.paidText}>₹{(parseFloat(total) - parseFloat(discount)).toFixed(2)}</Text>
+          </View>
         </View>
 
       <FlatList
@@ -212,17 +313,24 @@ const BuyerOrderDetailScreen = () => {
         keyExtractor={(item) => item.sparePartId._id}
         renderItem={renderItem}
       />
-      <View style={styles.summary}>
-        <TouchableOpacity style={styles.cancelButton}
-        onPress={() => handleCancelOrder()}
-        >
-            <Text style={styles.cancelText}>
-                {
-                    ['shipped', 'delivered', 'cancelled'].includes(orderObject.shipmentStatus) ? 'Cannot Cancel Order' : 'Cancel Order'
-                }
-            </Text>
-        </TouchableOpacity>
-      </View>
+
+      {
+        role !== 'admin' ?
+        (
+          <View style={styles.summary}>
+            <TouchableOpacity style={styles.cancelButton}
+            onPress={() => handleCancelOrder()}
+            >
+                <Text style={styles.cancelText}>
+                    {
+                        ['shipped', 'delivered', 'cancelled'].includes(orderObject.shipmentStatus) ? 'Cannot Cancel Order' : 'Cancel Order'
+                    }
+                </Text>
+            </TouchableOpacity>
+          </View>
+        )
+        : ('')
+      }
     </View>
   );
 };
@@ -232,7 +340,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
     paddingTop: 20,
-    paddingBottom: 70,
+    // paddingBottom: 70,
   },
   card: {
     flexDirection: 'row',
@@ -340,6 +448,13 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: Colors.icon,
   },
+  address: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: Colors.black,
+    textAlign: 'right',
+    paddingRight: 65,
+  },
   labelBold: {
     fontSize: 16,
     fontWeight: '600',
@@ -372,6 +487,36 @@ const styles = StyleSheet.create({
   },
   reviewOption: {
     alignItems: 'center',
+  },
+  dropdown: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 6,
+    backgroundColor: '#fff',
+  },
+  dropdownText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.icon,
+  },
+  dropdownList: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginTop: 4,
+    backgroundColor: '#fff',
+  },
+  dropdownItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  dropdownItemText: {
+    fontSize: 14,
+    color: Colors.black,
   },
 });
 

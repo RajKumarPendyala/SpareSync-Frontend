@@ -270,7 +270,7 @@ console.log('RegisterScreen - handleSignup');
         <Icon name="email-outline" size={20} color={Colors.icon} style={styles.icon} />
         <TextInput
           style={styles.input}
-          placeholder="Email id"
+          placeholder="Email"
           keyboardType="email-address"
           value={email}
           editable={!isEmailVerified}

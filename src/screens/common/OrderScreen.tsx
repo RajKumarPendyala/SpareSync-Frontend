@@ -21,6 +21,7 @@ type  BuyerOrderScreenNavigationProp = StackNavigationProp<StackParamList, 'Buye
 const BuyerOrderScreen: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [roleName, setRole] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
 
@@ -31,6 +32,7 @@ const BuyerOrderScreen: React.FC = () => {
       setLoading(true);
       const token = await AsyncStorage.getItem('token');
       const role = await AsyncStorage.getItem('role');
+      setRole(role);
 
       if (role === 'admin') {
         const url = status === 'all'
@@ -41,7 +43,6 @@ const BuyerOrderScreen: React.FC = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        console.log('admin: ',res);
         setOrders(res.data.orders);
       }else {
         const url = status === 'all'
@@ -78,7 +79,7 @@ const BuyerOrderScreen: React.FC = () => {
     return (
       <View style={styles.card}>
         <Pressable
-          onPress={() => navigation.navigate('OrderDetailScreen', { OrderObject: item })}
+          onPress={() => navigation.navigate('OrderDetailScreen', { OrderObject: item, role: roleName })}
           style={({ pressed }) => [
             pressed && { opacity: 0.9 },
           ]}
@@ -90,6 +91,14 @@ const BuyerOrderScreen: React.FC = () => {
             </Text>
           </View>
           <Text style={styles.date}>Placed on: {createdAt}</Text>
+
+          {
+            roleName === 'admin' ?
+            (
+              <Text style={styles.address}>{'Address: ' + item?.userId?.address?.houseNo.trim() + ', ' + item?.userId?.address?.street.trim() + ', ' + item?.userId?.address?.city.trim() + ', ' + item?.userId?.address?.state.trim() + ', ' +  item?.userId?.address?.postalCode.trim() + '.'}</Text>
+            )
+            : ('')
+          }
 
           <View style={styles.tableHeader}>
             <Text style={[styles.tableText, styles.itemCol]}>Item</Text>
@@ -118,11 +127,11 @@ const BuyerOrderScreen: React.FC = () => {
             <Text style={[styles.value, styles.discountValue]}>₹{discount}</Text>
           </View>
           <View style={styles.totalRow}>
-            <Text style={styles.labelBold}>Paid</Text>
+            <Text style={styles.labelBold}>Payable</Text>
             <Text style={styles.valueBold}>₹{finalAmount}</Text>
           </View>
 
-          <Text style={styles.paymentInfo}>Paid via {item.paymentMethod}</Text>
+          <Text style={styles.paymentInfo}>Payment via {item.paymentMethod}</Text>
         </Pressable>
       </View>
     );
@@ -197,6 +206,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     margin: 16,
+    color: Colors.primary,
   },
   card: {
     backgroundColor: Colors.inputContainerBG,
@@ -226,6 +236,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.black,
     marginVertical: 4,
+  },
+  address: {
+    lineHeight: 17,
   },
   paymentInfo: {
     marginTop: 6,
@@ -309,7 +322,6 @@ const styles = StyleSheet.create({
   loadingIndicator: {
     flex: 1,
   },
-
   filterContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
