@@ -1,4 +1,4 @@
-const isValidEmail = (emailv) => {
+const isValidEmail = (emailv : any) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(emailv);
 };

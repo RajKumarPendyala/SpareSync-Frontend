@@ -5,7 +5,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import styles from '../styles/secondaryButtonStyle';
+import styles from '../styles/SecondaryButtonStyle';
 
 interface Props {
   title?: string;

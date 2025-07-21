@@ -15,7 +15,7 @@ import ChatDetailScreen from '../screens/common/ChatDetailScreen';
 import BuyerOrderDetailScreen from '../screens/common/OrderDetailScreen';
 import BuyerReviewScreen from '../screens/buyer/BuyerReviewScreen';
 import SellerAddProductScreen from '../screens/seller/SellerAddProductScreen';
-import EditProductScreen from '../screens/common/EditProductScreen';
+import EditProductScreen from '../screens/seller/EditProductScreen';
 import SellerAlertScreen from '../screens/seller/SellerAlertScreen';
 import AdminUserDetailScreen from '../screens/admin/AdminUserDetailScreen';
 import Colors from '../context/colors';

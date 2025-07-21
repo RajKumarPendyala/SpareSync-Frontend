@@ -1,4 +1,4 @@
-const validatePassword = (Newpassword) => {
+const validatePassword = (Newpassword : any) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
     if (!Newpassword) {return 'Password is required.';}

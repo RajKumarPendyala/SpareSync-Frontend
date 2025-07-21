@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react';
 import {
     View,
-    StyleSheet,
-    Dimensions,
     Image,
   } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackParamList } from '../../navigation/StackNavigator';
-import Colors from '../../context/colors';
-
-const { width } = Dimensions.get('window');
+import styles from '../../styles/auth/OnBoardingScreenStyle';
 
 type OnBoardingScreenNavigationProp = StackNavigationProp<StackParamList, 'OnBoarding'>;
 
@@ -65,18 +61,5 @@ return (
   </View>
 );
 };
-
-const styles = StyleSheet.create({
-container: {
-  flex: 1,
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: Colors.background,
-},
-logo: {
-  height: width * 0.8,
-  marginBottom: 80,
-},
-});
 
 export default OnBoardingScreen;
