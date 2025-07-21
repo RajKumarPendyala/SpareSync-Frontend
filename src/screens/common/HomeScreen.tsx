@@ -202,14 +202,15 @@ console.log('BuyerScreen.handleAddCart');
             </TouchableOpacity>
           )}
         />
+      </View>
 
+      <View>
         {
           spareParts && spareParts.length > 0 ? (
             <FlatList
               data={spareParts}
               numColumns={1}
               keyExtractor={(item) => item._id}
-              contentContainerStyle={styles.grid2}
               renderItem={({ item }) => (
                 <Pressable onPress={() => navigation.navigate('BuyerProductDetails', { partId: item._id, roleName: role })} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>
                   <View style={styles.card2}>
@@ -306,7 +307,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingTop: 30,
+    paddingTop: 20,
   },
   header: {
     flexDirection: 'row',
@@ -343,20 +344,14 @@ const styles = StyleSheet.create({
   },
   grid: {
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: -15,
-    paddingBottom: 15,
-  },
-  grid2: {
-    paddingBottom: 447,
+    marginTop: 5,
   },
   card: {
     backgroundColor: Colors.secondaryButtonBG,
     borderRadius: 16,
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-    width: width * 0.42,
-    margin: 10,
+    paddingVertical: 14,
+    width: width * 0.44,
+    margin: 5,
     alignItems: 'center',
     elevation: 1,
   },
@@ -370,9 +365,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: Colors.inputContainerBG,
     borderRadius: 12,
-    marginVertical: 7,
-    marginHorizontal: 16,
-    padding: 10,
+    marginVertical: 6,
+    marginHorizontal: 15,
+    padding: 8,
     elevation: 2,
   },
   image: {
@@ -416,8 +411,8 @@ const styles = StyleSheet.create({
   },
   floatingAddIcon: {
     position: 'absolute',
-    right: 35,
-    bottom: 110,
+    right: 20,
+    bottom: 30,
     backgroundColor: Colors.primary,
     borderRadius: 30,
     padding: 14,

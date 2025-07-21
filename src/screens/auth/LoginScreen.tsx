@@ -64,11 +64,13 @@ console.log('LoginScreen - handleLogin');
           }
       );
 
-      const { token, role } = response.data;
+      const { token, role, id } = response.data;
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('role');
+      await AsyncStorage.removeItem('id');
       await AsyncStorage.setItem('token',token);
       await AsyncStorage.setItem('role',role);
+      await AsyncStorage.setItem('id', id);
       if (role === 'admin') {
           navigation.replace('AdminTabNav');
       } else if (role === 'seller') {

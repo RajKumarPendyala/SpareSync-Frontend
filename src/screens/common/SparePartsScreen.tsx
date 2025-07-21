@@ -355,8 +355,8 @@ const styles = StyleSheet.create({
   },
   floatingAddIcon: {
     position: 'absolute',
-    right: 35,
-    bottom: 150,
+    right: 20,
+    bottom: 30,
     backgroundColor: Colors.primary,
     borderRadius: 30,
     padding: 14,

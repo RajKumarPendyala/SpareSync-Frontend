@@ -10,6 +10,7 @@ import {
   Dimensions,
   ActivityIndicator,
   Pressable,
+  Modal,
 } from 'react-native';
 import axios from 'axios';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -31,6 +32,8 @@ const CartScreen: React.FC = () => {
   const [cart, setCart] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [orderPlaceable, setOrderPlaceable] = useState(true);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState('');
 
 const handleDelete = async (item: any) => {
   try {
@@ -125,8 +128,8 @@ const handleDelete = async (item: any) => {
         setCart(null);
       }
     } catch (error: any) {
-      console.error('Error placing order:', error?.response?.data || error.message);
-      Alert.alert('Fail','Failed to place order.');
+      console.log('Error placing order:', error?.response?.data.message || error.message);
+      Alert.alert('Fail', error?.response?.data.message);
     }
   };
 
@@ -260,10 +263,73 @@ const handleDelete = async (item: any) => {
               <Text style={styles.totalText}>₹{(parseFloat(total) - parseFloat(discount || '0')).toFixed(2)}</Text>
             </View>
         <Text style={styles.discountText}>Discount: ₹{discount}</Text>
-        <TouchableOpacity style={styles.checkoutButton} onPress={() => handlePlaceOrder() }>
+        <TouchableOpacity style={styles.checkoutButton} onPress={() => setShowPaymentModal(true) }>
           <Text style={styles.checkoutText}>Proceed to Checkout</Text>
         </TouchableOpacity>
       </View>
+
+      <Modal
+        transparent
+        visible={showPaymentModal}
+        animationType="slide"
+        onRequestClose={() => setShowPaymentModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Select Payment Method</Text>
+
+            {['Credit Card', 'UPI', 'Digital Wallet', 'Cash on Delivery'].map((option) => (
+              <TouchableOpacity
+                key={option}
+                style={[
+                  styles.paymentOption,
+                  selectedPayment === option && styles.selectedOption,
+                ]}
+                onPress={() => setSelectedPayment(option)}
+              >
+                <Text style={styles.optionText}>{option}</Text>
+              </TouchableOpacity>
+            ))}
+
+            <TouchableOpacity
+              style={styles.confirmButton}
+              onPress={() => {
+                if (selectedPayment === 'Digital Wallet') {
+                  Alert.alert(
+                    'Confirm Payment',
+                    'Are you sure you want to place the order using Digital Wallet?',
+                    [
+                      {
+                        text: 'Cancel',
+                        style: 'cancel',
+                      },
+                      {
+                        text: 'Yes, Place Order',
+                        onPress: () => {
+                          setShowPaymentModal(false);
+                          handlePlaceOrder();
+                        },
+                      },
+                    ]
+                  );
+                } else {
+                  setShowPaymentModal(false);
+                  Alert.alert('Info', `${selectedPayment} payment option is coming soon.`);
+                }
+              }}
+              disabled={!selectedPayment}
+            >
+              <Text style={styles.confirmText}>
+                {selectedPayment ? `Pay with ${selectedPayment}` : 'Select Option'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -407,6 +473,61 @@ const styles = StyleSheet.create({
     color: 'red',
     fontWeight: '600',
     marginTop: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '85%',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: Colors.primary,
+  },
+  paymentOption: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: Colors.inputContainerBD,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  selectedOption: {
+    borderColor: Colors.green,
+    backgroundColor: Colors.inputContainerBG,
+  },
+  optionText: {
+    fontSize: 16,
+    color: Colors.black,
+  },
+  confirmButton: {
+    backgroundColor: Colors.green,
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 20,
+    width: '100%',
+    alignItems: 'center',
+  },
+  confirmText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  cancelText: {
+    color: Colors.secondary,
+    marginTop: 15,
+    fontSize: 16,
   },
 });
 

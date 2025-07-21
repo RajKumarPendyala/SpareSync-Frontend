@@ -92,7 +92,7 @@ const StackNavigator: React.FC = () => {
                 })}
             />
             <Stack.Screen name="Profile" component={ProfileScreen} />
-            <Stack.Screen name="Wallet" component={WalletScreen} />
+            <Stack.Screen name="Wallet" component={WalletScreen} options={{ headerShown: false }}/>
         </Stack.Navigator>
     );
 };

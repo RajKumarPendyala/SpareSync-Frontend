@@ -19,6 +19,7 @@ export interface UserProfile {
   phoneNumber: string;
   address: Address;
   image: ImageType;
+  walletAmount: number;
 }
 
 interface ProfileContextType {
@@ -38,6 +39,7 @@ const defaultProfile: UserProfile = {
     state: '',
   },
   image: { path: '' },
+  walletAmount: 0,
 };
 
 const ProfileContext = createContext<ProfileContextType>({

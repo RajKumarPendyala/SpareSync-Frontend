@@ -183,7 +183,7 @@ const BuyerOrderDetailScreen = () => {
   };
 
 
-  const statusOptions = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+  const statusOptions = ['processing', 'shipped', 'delivered', 'cancelled'];
 
   const getStatusStyle = (status: string) => {
     switch (status.toLowerCase()) {
