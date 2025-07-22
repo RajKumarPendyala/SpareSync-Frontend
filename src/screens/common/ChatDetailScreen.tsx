@@ -11,14 +11,16 @@ import {
   Image,
   Modal,
 } from 'react-native';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { RouteProp, useRoute, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { StackParamList } from '../../navigation/StackNavigator';
 import Colors from '../../context/colors';
-import { IP_ADDRESS } from '@env';
-import styles from '../../styles/common/ChatDetailScreenStyle';
+import styles from '../../styles/common/chatDetailScreenStyle';
+import {
+  fetchConversationService,
+  sendMessageService,
+  deleteConversationService,
+} from '../../services/common/chatDetailService';
 
 
 const ChatDetailScreen = () => {
@@ -35,22 +37,11 @@ const ChatDetailScreen = () => {
 
 
   const fetchConversation = async () => {
-    const token = await AsyncStorage.getItem('token');
     try {
-      const response = await axios.get(
-        `http://${IP_ADDRESS}:3000/api/users/conversations/messages`,
-        {
-          params: { conversationId: conversationId },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setMessages(response.data.conversation.messages);
-      const currentId = response.data.currentUser;
-      setCurrentUserId(currentId);
-      setOtherParticipant(response.data.conversation.participants.find((p: any) => p._id !== currentId));
+      const data = await fetchConversationService(conversationId);
+      setMessages(data.conversation.messages);
+      setCurrentUserId(data.currentUser);
+      setOtherParticipant(data.conversation.participants.find((p: any) => p._id !== data.currentUser));
 
     } catch (error: any) {
       console.error('Failed to fetch conversation:', error?.response?.data || error.message);
@@ -78,20 +69,10 @@ const ChatDetailScreen = () => {
           text: 'Yes',
           onPress: async () => {
             try {
-              const token = await AsyncStorage.getItem('token');
-              const response = await axios.patch(
-                `http://${IP_ADDRESS}:3000/api/users/conversations`,
-                { id: otherParticipant._id },
-                {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                }
-              );
-
+              const data = await deleteConversationService(otherParticipant._id);
               navigation.goBack();
 
-              if (response.data.message) {
+              if (data.message) {
                 Alert.alert('Success','Conversation deleted successfully!');
               }
             } catch (error: any) {
@@ -112,21 +93,11 @@ const ChatDetailScreen = () => {
       return;
     }
 
-    const token = await AsyncStorage.getItem('token');
-
     try {
-      const response = await axios.post(
-        `http://${IP_ADDRESS}:3000/api/users/conversations/message`,
-        {
-          receiverId: otherParticipant._id,
-          text: message,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const data = await sendMessageService(otherParticipant._id, message);
+      const newMessage = data.conversation.messages.slice(-1)[0];
+      setMessages(prev => [...prev, newMessage]);
 
-      setMessages(prev => [...prev, response.data.conversation.messages.slice(-1)[0]]);
       setMessage('');
       flatListRef.current?.scrollToEnd({ animated: true });
     } catch (error: any) {

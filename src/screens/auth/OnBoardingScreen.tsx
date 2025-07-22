@@ -6,7 +6,7 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackParamList } from '../../navigation/StackNavigator';
-import styles from '../../styles/auth/OnBoardingScreenStyle';
+import styles from '../../styles/auth/onBoardingScreenStyle';
 
 type OnBoardingScreenNavigationProp = StackNavigationProp<StackParamList, 'OnBoarding'>;
 

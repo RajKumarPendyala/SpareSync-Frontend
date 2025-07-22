@@ -5,7 +5,8 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import { useSpareParts } from '../../context/SparePartsContext';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Colors from '../../context/colors';
-import styles from '../../styles/seller/SellerAlertScreenStyle';
+import styles from '../../styles/seller/sellerAlertScreenStyle';
+import { getLowStockSpareParts } from '../../services/seller/sellerAlertService';
 
 
 type SellerAlertScreenNavigationProp = StackNavigationProp<StackParamList, 'AlertScreen'>;
@@ -18,9 +19,9 @@ interface Props {
 const SellerAlertScreen: React.FC<Props> = ({ navigation }) => {
 
   const { spareParts } = useSpareParts();
-  let filteredParts = spareParts.filter((part: any) => part.quantity <= 10);
-    const route = useRoute<RouteProp<StackParamList, 'AlertScreen'>>();
-    const { roleName } = route.params;
+  const filteredParts = getLowStockSpareParts(spareParts);
+  const route = useRoute<RouteProp<StackParamList, 'AlertScreen'>>();
+  const { roleName } = route.params;
 
   return (
     <View style={styles.container}>

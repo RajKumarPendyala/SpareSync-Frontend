@@ -7,13 +7,11 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import axios from 'axios';
-import { IP_ADDRESS } from '@env';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import styles from '../../styles/common/ChatScreenStyle';
+import styles from '../../styles/common/chatScreenStyle';
+import { fetchConversations } from '../../services/common/chatService';
 
 
 type Conversation = {
@@ -40,28 +38,21 @@ const ChatScreen = () => {
 
   const navigation = useNavigation<ChatScreenNavigationProp>();
 
-  const fetchConversations = async () => {
+  const loadConversations = async () => {
     try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`http://${IP_ADDRESS}:3000/api/users/conversations`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-console.log('conversation response: ',response);
-
-      setConversations(response.data.conversations);
-      setCurrentUserId(response.data.userId);
-    } catch (error: any) {
-        console.error('Error removing to cart:', error?.response?.data || error.message);
-        Alert.alert('Failed to remove item from cart.');
-      }
+      const data = await fetchConversations();
+      setConversations(data.conversations);
+      setCurrentUserId(data.userId);
+    } catch (error) {
+      Alert.alert('Failed to load conversations.');
+    }
   };
 
-    useFocusEffect(
-      useCallback(() => {
-        fetchConversations();
-      }, [])
-    );
+  useFocusEffect(
+    useCallback(() => {
+      loadConversations();
+    }, [])
+  );
 
   const renderItem = ({ item }: { item: Conversation }) => {
     const today = new Date();

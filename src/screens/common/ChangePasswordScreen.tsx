@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import validatePassword from '../../utils/validatePassword';
 import Colors from '../../context/colors';
-import axios from 'axios';
-import { IP_ADDRESS } from '@env';
-import styles from '../../styles/common/ChangePasswordScreenstyle';
+import styles from '../../styles/common/changePasswordScreenstyle';
+import { changePasswordService } from '../../services/common/changePasswordService';
+
 
 
 const ChangePasswordScreen = () => {
@@ -40,30 +39,15 @@ const ChangePasswordScreen = () => {
     setErrorMessage('');
 
     try {
-        const token = await AsyncStorage.getItem('token');
+        const success = await changePasswordService(currentPassword, newPassword);
 
-        console.log('Token',token);
-
-        const res = await axios.patch(
-            `http://${IP_ADDRESS}:3000/api/users/change-password`,
-            {
-                currentPassword,
-                newPassword,
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        );
-
-        if (res.data.success) {
-            setCurrentPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
-            Alert.alert('Success', 'Password changed successful.');
+        if (success) {
+          setCurrentPassword('');
+          setNewPassword('');
+          setConfirmPassword('');
+          Alert.alert('Success', 'Password changed successfully.');
         }
+
     } catch (error: any) {
         if (error.response?.data?.message) {
             setErrorMessage(error.response.data.message);

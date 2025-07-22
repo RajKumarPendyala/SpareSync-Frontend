@@ -16,7 +16,7 @@ import { IP_ADDRESS } from '@env';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import styles from '../../styles/common/ProductDetailsScreenStyle';
+import styles from '../../styles/common/productDetailsScreenStyle';
 
 
 type BuyerProductDetailsScreenNavigationProp = StackNavigationProp<

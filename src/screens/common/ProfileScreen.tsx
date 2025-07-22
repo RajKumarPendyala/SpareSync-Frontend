@@ -20,7 +20,7 @@ import { StackParamList } from '../../navigation/StackNavigator';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Colors from '../../context/colors';
 import validateMobile  from '../../utils/validateMobile';
-import styles from '../../styles/common/ProfileScreenStyle';
+import styles from '../../styles/common/profileScreenStyle';
 
 
 type ProfileScreenNavigationProp = StackNavigationProp<StackParamList, 'Profile'>;

@@ -10,28 +10,17 @@ import {
   Modal,
   Alert,
 } from 'react-native';
-import axios from 'axios';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { IP_ADDRESS } from '@env';
 import Colors from '../../context/colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import styles from '../../styles/admin/AdminUsersScreenStyle';
+import styles from '../../styles/admin/adminUsersScreenStyle';
+import { fetchUsersByRole, User } from '../../services/admin/adminUserService';
 
 
 type RootStackNavigationProp = StackNavigationProp<StackParamList, 'AdminTabNav'>;
-
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  phoneNumber: number;
-  image?: {
-    path: string;
-  };
-}
 
 const FILTERS = [
   { label: 'All', value: '' },
@@ -55,20 +44,15 @@ const AdminUsersScreen = () => {
   const fetchUsers = async (role = '') => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`http://${IP_ADDRESS}:3000/api/users/`, {
-        params: { role },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setUsers(response.data.users);
+      const fetchedUsers = await fetchUsersByRole(role);
+      setUsers(fetchedUsers);
     } catch (error) {
       console.error('Failed to fetch users', error);
     } finally {
       setLoading(false);
     }
   };
+
 
   const renderUser = ({ item }: { item: User }) => (
     <Pressable onPress={() => navigation.navigate('UserDetailScreen', { userObject: item } )} style={({ pressed }) => [ pressed && { opacity: 0.9 } ]}>

@@ -13,9 +13,8 @@ import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import isValidEmail from '../../utils/isValidEmail';
 import Colors from '../../context/colors';
-import axios from 'axios';
-import { IP_ADDRESS } from '@env';
-import styles from '../../styles/auth/ForgotPasswordScreenStyle';
+import styles from '../../styles/auth/forgotPasswordScreenStyle';
+import { sendForgotPasswordRequest } from '../../services/auth/forgotPasswordService';
 
 
 
@@ -33,8 +32,7 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
   const partnest_logo = require('../../assets/icons/partnest_logo.png');
 
   const handleSend = async () => {
-
-console.log('forgotPasswordScreen - handleSend');
+    console.log('forgotPasswordScreen - handleSend');
 
     if (!email) {
       setErrorMessage('Please enter your email address.');
@@ -49,31 +47,16 @@ console.log('forgotPasswordScreen - handleSend');
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        `http://${IP_ADDRESS}:3000/api/users/forgot-password`,
-        { email },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if(response){
-        setErrorMessage('');
-        navigation.replace('PasswordReset', { email });
-      }
-
+      await sendForgotPasswordRequest(email);
+      setErrorMessage('');
+      navigation.replace('PasswordReset', { email });
     } catch (error: any) {
-      if (error.response?.data?.message) {
-        setErrorMessage(error.response.data.message);
-      } else {
-        setErrorMessage('Something went wrong. Please try again.');
-      }
+      setErrorMessage(error.message);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

@@ -8,14 +8,12 @@ import {
   Button,
   ActivityIndicator,
 } from 'react-native';
-import axios from 'axios';
-import { IP_ADDRESS } from '@env';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../../navigation/StackNavigator';
 import Colors from '../../context/colors';
-import styles from '../../styles/admin/AdminUserDetailScreenStyle';
+import styles from '../../styles/admin/adminUserDetailScreenStyle';
+import { deleteUserById } from '../../services/admin/adminUserDetailService';
 
 type RootStackNavigationProp = StackNavigationProp<StackParamList, 'BuyerTabNav'>;
 
@@ -37,20 +35,14 @@ const AdminUserDetailScreen = () => {
           onPress: async () => {
             setLoading(true);
             try {
-              const token = await AsyncStorage.getItem('token');
-              const res = await axios.patch(`http://${IP_ADDRESS}:3000/api/users/`,
-                { _id: userObject._id, isDeleted: true},
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    validateStatus: (status) => status === 200 || status === 410,
-                }
-              );
-              Alert.alert('Success', res.data.message || 'User deleted successfully');
+              const message = await deleteUserById(userObject._id);
+              Alert.alert('Success', message);
               navigation.goBack();
-              setLoading(false);
             } catch (err) {
               console.error('Delete user error:', err);
               Alert.alert('Error', 'Failed to delete user.');
+            } finally {
+              setLoading(false);
             }
           },
         },

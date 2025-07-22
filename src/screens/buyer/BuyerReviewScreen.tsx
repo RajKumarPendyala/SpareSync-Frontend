@@ -11,14 +11,12 @@ import {
 } from 'react-native';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { StackParamList } from '../../navigation/StackNavigator';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { IP_ADDRESS } from '@env';
-import axios from 'axios';
 import Colors from '../../context/colors';
 import pickAndUploadImage from '../../utils/pickAndUploadImage';
-import styles from '../../styles/buyer/BuyerReviewScreenStyle';
+import styles from '../../styles/buyer/buyerReviewScreenStyle';
+import { submitReview } from '../../services/buyer/buyerReviewService';
 
 type RootStackNavigationProp = StackNavigationProp<StackParamList, 'BuyerTabNav'>;
 
@@ -40,40 +38,22 @@ const BuyerReviewScreen = () => {
   };
 
   const handleSubmit = async () => {
-    try {
-      setSubmitting(true);
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        Alert.alert('Error', 'Please log in to submit a review.');
-        return;
-      }
+    setSubmitting(true);
 
-      const response = await axios.post(
-        `http://${IP_ADDRESS}:3000/api/users/reviews`,
-        {
-            sparePartId,
-            rating,
-            comment,
-            imagePaths: images.map((url) => ({ path: url })),
-        },
-        {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        }
-        );
-        console.log(response);
+    const result = await submitReview({
+      sparePartId,
+      rating,
+      comment,
+      imagePaths: images,
+    });
 
-      if (response.status === 201) {
-        Alert.alert('Success', 'Review submitted successfully');
-        navigation.goBack();
-      }
-    } catch (error: any) {
-        console.error('Error Failed to submit review :', error?.response?.data || error.message);
-        Alert.alert('Error','Failed to submit review.');
-    } finally {
-        setSubmitting(false);
+    setSubmitting(false);
+
+    if (result.success) {
+      Alert.alert('Success', result.message);
+      navigation.goBack();
+    } else {
+      Alert.alert('Error', result.message);
     }
   };
 

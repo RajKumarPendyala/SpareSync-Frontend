@@ -10,13 +10,11 @@ import {
   ActivityIndicator,
   Button,
 } from 'react-native';
-import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
-import { IP_ADDRESS } from '@env';
 import { useSpareParts } from '../../context/SparePartsContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import pickAndUploadImage from '../../utils/pickAndUploadImage';
-import styles from '../../styles/seller/EditProductScreenStyle';
+import styles from '../../styles/seller/editProductScreenStyle';
+import { validateSparePartForAdd, addSparePart } from '../../services/seller/sellerAddProductService';
 
 const SellerAddProductScreen = () => {
   const navigation = useNavigation();
@@ -76,73 +74,24 @@ const SellerAddProductScreen = () => {
   };
 
   const handleSave = async () => {
-    try {
-      if (!sparePart.name?.trim()) {
-        Alert.alert('Validation Error', 'Name is required');
-        return;
-      }
-      if (!sparePart.description?.trim()) {
-        Alert.alert('Validation Error', 'Description is required');
-        return;
-      }
-      if (
-        !sparePart.price?.$numberDecimal ||
-        Number(sparePart.price.$numberDecimal) < 0
-      ) {
-        Alert.alert('Validation Error', 'Price must be zero or positive');
-        return;
-      }
-      if (
-        sparePart.quantity === null ||
-        sparePart.quantity === undefined ||
-        isNaN(sparePart.quantity) ||
-        sparePart.quantity < 0
-      ) {
-        Alert.alert('Validation Error', 'Quantity must be zero or positive');
-        return;
-      }
-      if (!sparePart.brand?.trim()) {
-        Alert.alert('Validation Error', 'Brand is required');
-        return;
-      }
-      if (!sparePart.gadgetType) {
-        Alert.alert('Validation Error', 'Gadget type is required');
-        return;
-      }
-      const token = await AsyncStorage.getItem('token');
+    const validationError = validateSparePartForAdd(sparePart);
+    if (validationError) {
+      Alert.alert('Validation Error', validationError);
+      return;
+    }
 
-      const payload = {
-        ...sparePart,
-        quantity: Number(sparePart.quantity),
-        imagePaths: sparePart.images || [],
-      };
+    setLoading(true);
 
-      console.log('Payload:', payload);
+    const result = await addSparePart(sparePart);
 
-      setLoading(true);
+    setLoading(false);
 
-      const response = await axios.post(
-        `http://${IP_ADDRESS}:3000/api/users/products/seller`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log('after saving data',response.data.createdSparePart);
-
-      if (response.status === 201) {
-        setSpareParts([...spareParts, response.data.createdSparePart]);
-        setLoading(false);
-        Alert.alert('Success', 'Spare part added successfully');
-        navigation.goBack();
-      } else {
-        Alert.alert('Error', 'Creation failed');
-      }
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'Creation failed');
+    if (result.success) {
+      setSpareParts([...spareParts, result.createdSparePart]);
+      Alert.alert('Success', result.message);
+      navigation.goBack();
+    } else {
+      Alert.alert('Error', result.message);
     }
   };
 

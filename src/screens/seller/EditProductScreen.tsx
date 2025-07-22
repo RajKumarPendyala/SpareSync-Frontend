@@ -10,14 +10,14 @@ import {
   ActivityIndicator,
   Button,
 } from 'react-native';
-import axios from 'axios';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
-import { IP_ADDRESS } from '@env';
 import { useSpareParts } from '../../context/SparePartsContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackParamList } from '../../navigation/StackNavigator';
 import pickAndUploadImage from '../../utils/pickAndUploadImage';
-import styles from '../../styles/seller/EditProductScreenStyle';
+import styles from '../../styles/seller/editProductScreenStyle';
+import { validateSparePart, updateSparePart } from '../../services/seller/sellerEditProductService';
+
+
 
 type EditScreenRouteProp = RouteProp<StackParamList, 'EditProductScreen'>;
 
@@ -96,72 +96,27 @@ const EditProductScreen = () => {
 
 
   const handleSave = async () => {
-    try {
-      const qtyNumber = Number(sparePart.quantity);
-      if (!sparePart.name?.trim()) {
-        Alert.alert('Validation Error', 'Name is required');
-        return;
-      }
-      if (!sparePart.description?.trim()) {
-        Alert.alert('Validation Error', 'Description is required');
-        return;
-      }
-      if (
-        !sparePart.price?.$numberDecimal ||
-        Number(sparePart.price.$numberDecimal) < 0
-      ) {
-        Alert.alert('Validation Error', 'Price must be zero or positive');
-        return;
-      }
-      if (!sparePart.quantity?.toString().trim() || isNaN(qtyNumber) || qtyNumber < 0) {
-        Alert.alert('Validation Error', 'Quantity must be zero or positive');
-        return;
-      }
-      if (!sparePart.brand?.trim()) {
-        Alert.alert('Validation Error', 'Brand is required');
-        return;
-      }
-      if (!sparePart.gadgetType) {
-        Alert.alert('Validation Error', 'Gadget type is required');
-        return;
-      }
-      const token = await AsyncStorage.getItem('token');
+    const validationError = validateSparePart(sparePart);
+    if (validationError) {
+      Alert.alert('Validation Error', validationError);
+      return;
+    }
 
-      const payload = {
-        _id: sparePartId,
-        ...sparePart,
-        quantity: qtyNumber,
-        imagePaths: sparePart.images,
-      };
+    setLoading(true);
+    const result = await updateSparePart({ _id: sparePartId, ...sparePart });
 
+    setLoading(false);
 
-      setLoading(true);
-
-      const response = await axios.patch(
-        `http://${IP_ADDRESS}:3000/api/users/products/`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+    if (result.success) {
+      setSpareParts((prevSpareParts: any) =>
+        prevSpareParts.map((part: any) =>
+          part._id === sparePartId ? { ...sparePart } : part
+        )
       );
-
-      if (response.status === 200) {
-        setSpareParts((prevSpareParts: any) =>
-          prevSpareParts.map((part: any) =>
-            part._id === sparePartId ? { ...sparePart } : part
-          )
-        );
-        setLoading(false);
-        Alert.alert('Success', 'Spare part updated successfully');
-        navigation.goBack();
-      } else {
-        Alert.alert('Error', 'Update failed');
-      }
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'Update failed');
+      Alert.alert('Success', result.message);
+      navigation.goBack();
+    } else {
+      Alert.alert('Error', result.message);
     }
   };
 

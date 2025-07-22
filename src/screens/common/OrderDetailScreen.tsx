@@ -8,14 +8,12 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import axios from 'axios';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { IP_ADDRESS } from '@env';
 import Colors from '../../context/colors';
-import styles from '../../styles/common/OrderDetailScreenStyle';
+import styles from '../../styles/common/orderDetailScreenStyle';
+import { updateOrderStatus, cancelOrder } from '../../services/common/orderDetailService';
 
 
 type RootStackNavigationProp = StackNavigationProp<StackParamList, 'BuyerTabNav'>;
@@ -101,79 +99,49 @@ const OrderDetailScreen = () => {
   };
 
   const handleStatusUpdate = async (newStatus: string) => {
-    if(orderObject.shipmentStatus === 'cancelled'){
+    if (orderObject.shipmentStatus === 'cancelled') {
       return;
     }
-    const orderId = orderObject._id;
+
     try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await axios.patch(
-        `http://${IP_ADDRESS}:3000/api/users/orders/admin`,
-        { orderId, shipmentStatus: newStatus },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.status === 200) {
-        setOrderObject((prev: any) => ({
-          ...prev,
-          shipmentStatus: newStatus,
-        }));
+      const success = await updateOrderStatus(orderObject._id, newStatus);
+      if (success) {
+        setOrderObject((prev: any) => ({ ...prev, shipmentStatus: newStatus }));
         setSelectedStatus(newStatus);
         Alert.alert('Success', `Order status updated to ${newStatus}`);
       }
-    } catch (error: any) {
-      console.error('Status update error:', error?.response?.data || error.message);
+    } catch (error) {
       Alert.alert('Failed to update status');
     }
   };
 
   const handleCancelOrder = async () => {
-    if(['shipped', 'delivered', 'cancelled'].includes(orderObject.shipmentStatus)){
-        return;
+    if (['shipped', 'delivered', 'cancelled'].includes(orderObject.shipmentStatus)) {
+      return;
     }
 
     Alert.alert(
       'Confirm Cancel',
       'Are you sure you want to cancel order?',
       [
-        {
-          text: 'No',
-          onPress: () => {},
-          style: 'cancel',
-        },
+        { text: 'No', style: 'cancel' },
         {
           text: 'Yes',
+          style: 'destructive',
           onPress: async () => {
-            const orderId = orderObject._id;
             try {
-              const token = await AsyncStorage.getItem('token');
-              const response = await axios.patch(
-                `http://${IP_ADDRESS}:3000/api/users/orders`,
-                { orderId },
-                {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                }
-              );
-
-              console.log('afterUpdate',response);
-              setOrderObject((prevOrder: any) => ({
-                  ...prevOrder,
+              const success = await cancelOrder(orderObject._id);
+              if (success) {
+                setOrderObject((prev: any) => ({
+                  ...prev,
                   shipmentStatus: 'cancelled',
-              }));
-              if (response.status === 200) {
-                Alert.alert('Success','Order cancelled successfully!');
+                }));
+                Alert.alert('Success', 'Order cancelled successfully!');
               }
-            } catch (error: any) {
-              console.error('Error order cancel :', error?.response?.data || error.message);
+            } catch (error) {
               Alert.alert('Failed to cancel order.');
             }
           },
-          style: 'destructive',
         },
       ],
       { cancelable: true }

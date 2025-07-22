@@ -15,9 +15,9 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../../navigation/StackNavigator';
 import validatePassword from '../../utils/validatePassword';
 import Colors from '../../context/colors';
-import axios from 'axios';
-import { IP_ADDRESS } from '@env';
-import styles from '../../styles/auth/PasswordResetScreenStyle';
+import styles from '../../styles/auth/passwordResetScreenStyle';
+import { resendOtp, resetPassword } from '../../services/auth/passwordResetService';
+
 
 
 type PasswordResetScreenNavigationProp = StackNavigationProp<StackParamList, 'PasswordReset'>;
@@ -75,26 +75,21 @@ const PasswordResetScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleResendOtp = async () => {
+    console.log('PasswordResetScreen - handleResendOtp', email);
 
-console.log('PasswordResetScreen - handleResendOtp',email);
+    if (!isResendEnabled) {
+      return;
+    }
 
-    if (!isResendEnabled) {return;}
     try {
-      await axios.post(
-        `http://${IP_ADDRESS}:3000/api/users/forgot-password`,
-        { email },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      await resendOtp(email);
       startTimer();
       setErrorMessage('OTP sent successfully.');
-    } catch (err) {
-      Alert.alert('Error', 'Failed to resend OTP. Please try again.');
+    } catch (err: any) {
+      Alert.alert('Error', err.message);
     }
   };
+
 
   const handleResetPassword = async () => {
     if (!otp || !newPassword || !confirmPassword) {
@@ -108,7 +103,7 @@ console.log('PasswordResetScreen - handleResendOtp',email);
       return;
     }
 
-    if (!(newPassword === confirmPassword)) {
+    if (newPassword !== confirmPassword) {
       setErrorMessage('Passwords do not match. Please try again.');
       return;
     }
@@ -117,34 +112,16 @@ console.log('PasswordResetScreen - handleResendOtp',email);
     setErrorMessage('');
 
     try {
-      const res = await axios.patch(
-        `http://${IP_ADDRESS}:3000/api/users/reset-password`,
-        {
-          email,
-          otp,
-          newPassword,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      console.log(res);
-      if (res.data.success) {
-        navigation.replace('Login');
-        Alert.alert('Success', 'Password reset successful. Please login.');
-      }
+      await resetPassword(email, otp, newPassword);
+      navigation.replace('Login');
+      Alert.alert('Success', 'Password reset successful. Please login.');
     } catch (error: any) {
-      if (error.response?.data?.message) {
-        setErrorMessage(error.response.data.message);
-      } else {
-        setErrorMessage('Something went wrong. Please try again.');
-      }
+      setErrorMessage(error.message);
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleCancel = () => {
     clearInterval(intervalRef.current as ReturnType<typeof setInterval>);

@@ -10,16 +10,20 @@ import {
   Pressable,
   Modal,
 } from 'react-native';
-import axios from 'axios';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSpareParts } from '../../context/SparePartsContext';
 import Colors from '../../context/colors';
-import { IP_ADDRESS } from '@env';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import styles from '../../styles/buyer/BuyerCartScreenStyle';
+import styles from '../../styles/buyer/buyerCartScreenStyle';
+import {
+  fetchCartItems,
+  updateCartItemQuantity,
+  removeCartItem,
+  placeOrder,
+} from '../../services/buyer/buyerCartService';
+
 
 type RootStackNavigationProp = StackNavigationProp<StackParamList, 'BuyerTabNav'>;
 
@@ -33,39 +37,27 @@ const BuyerCartScreen: React.FC = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState('');
 
-const handleDelete = async (item: any) => {
-  try {
-    const token = await AsyncStorage.getItem('token');
-    const response = await axios.patch(
-      `http://${IP_ADDRESS}:3000/api/users/cart/items/buyer`,
-      { sparePartId: item.sparePartId },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    console.log('cart',response);
-    await fetchCart();
+  const handleDelete = async (item: any) => {
+    try {
+      const response = await removeCartItem(item.sparePartId);
+      console.log('cart', response);
+      await fetchCart();
 
-    if (response.data.message) {
-      Alert.alert('Success','Item removed from cart successfully!');
+      if (response.message) {
+        Alert.alert('Success', 'Item removed from cart successfully!');
+      }
+    } catch (error: any) {
+      console.error('Error removing item from cart:', error?.response?.data || error.message);
+      Alert.alert('Failed to remove item from cart.');
     }
-  } catch (error: any) {
-    console.error('Error removing to cart:', error?.response?.data || error.message);
-    Alert.alert('Failed to remove item from cart.');
-  }
-};
+  };
+
 
   const fetchCart = async () => {
     try {
-      const token = await AsyncStorage.getItem('token');
-      const res = await axios.get(`http://${IP_ADDRESS}:3000/api/users/cart/items/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setCart(res.data.cartData);
-
-    } catch (err: any) {
+      const data = await fetchCartItems();
+      setCart(data);
+    } catch (err) {
       setCart(null);
     } finally {
       setLoading(false);
@@ -80,26 +72,14 @@ const handleDelete = async (item: any) => {
 
   const updateQuantity = async (item: any, newQuantity: number) => {
     try {
-      const token = await AsyncStorage.getItem('token');
-      await axios.patch(
-        `http://${IP_ADDRESS}:3000/api/users/cart/items/`,
-        {
-          sparePartId: item.sparePartId._id,
-          quantity: newQuantity,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      await updateCartItemQuantity(item.sparePartId._id, newQuantity);
       await fetchCart();
     } catch (error: any) {
       console.error('Error updating quantity:', error?.response?.data || error.message);
       Alert.alert('Failed to update quantity.');
     }
   };
+
 
   const handlePlaceOrder = async () => {
     if (!orderPlaceable) {
@@ -109,27 +89,17 @@ const handleDelete = async (item: any) => {
       return;
     }
     try {
-      const token = await AsyncStorage.getItem('token');
-      console.log(token);
-      const response = await axios.post(
-        `http://${IP_ADDRESS}:3000/api/users/orders/`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      const response = await placeOrder();
       if (response.status === 201) {
-        Alert.alert('Success','Order placed successfully!');
+        Alert.alert('Success', 'Order placed successfully!');
         setCart(null);
       }
     } catch (error: any) {
       console.log('Error placing order:', error?.response?.data.message || error.message);
-      Alert.alert('Fail', error?.response?.data.message);
+      Alert.alert('Fail', error?.response?.data.message || 'Something went wrong.');
     }
   };
+
 
   const renderItem = ({ item }: any) => {
     const part = item.sparePartId;

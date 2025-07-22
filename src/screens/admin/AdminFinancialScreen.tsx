@@ -7,11 +7,9 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { IP_ADDRESS } from '@env';
-import styles from '../../styles/admin/AdminFinancialScreenStyle';
+import styles from '../../styles/admin/adminFinancialScreenStyle';
+import { fetchFinancialReport } from '../../services/admin/adminFinancialService';
 
 interface FinancialSummary {
   totalSales: string;
@@ -53,38 +51,13 @@ const AdminFinancialScreen = () => {
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
 
   const fetchReport = async (type: 'complete' | 'monthly' | 'yearly') => {
-    if (type === 'monthly' && (!year || !month)) {
-      Alert.alert('Missing Fields', 'Please select both year and month.');
-      return;
-    }
-    if (type === 'yearly' && !year) {
-      Alert.alert('Missing Fields', 'Please select year.');
-      return;
-    }
-
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('token');
-      let endpoint = '/api/users/financial-reports';
-      let body = {};
-
-      if (type === 'monthly') {
-        endpoint += '/monthly';
-        body = { year, month };
-      } else if (type === 'yearly') {
-        endpoint += '/yearly';
-        body = { year };
-      }
-
-      const res = await axios.get(`http://${IP_ADDRESS}:3000${endpoint}`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: body,
-      });
-
-      setSummary(res.data.data);
+      const data = await fetchFinancialReport({ type, year, month });
+      setSummary(data);
     } catch (err: any) {
       console.error('Financial fetch error:', err);
-      Alert.alert('Error', err.response?.data?.message || 'Failed to fetch report');
+      Alert.alert('Error', err.message || 'Failed to fetch report');
     } finally {
       setLoading(false);
     }

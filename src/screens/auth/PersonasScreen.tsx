@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../../navigation/StackNavigator';
-import styles from '../../styles/auth/PersonasScreenStyle';
+import styles from '../../styles/auth/personasScreenStyle';
 
 
 type PersonasScreenNavigationProp = StackNavigationProp<StackParamList, 'Personas'>;

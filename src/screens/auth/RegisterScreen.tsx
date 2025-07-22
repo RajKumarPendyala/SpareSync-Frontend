@@ -11,17 +11,19 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { IP_ADDRESS } from '@env';
 import isValidEmail from '../../utils/isValidEmail';
 import validatePassword  from '../../utils/validatePassword';
 import validateMobile  from '../../utils/validateMobile';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Colors from '../../context/colors';
-import axios from 'axios';
-import styles from '../../styles/auth/RegisterScreenStyle';
+import styles from '../../styles/auth/registerScreenStyle';
+import {
+  handleSignupService,
+  sendOtpService,
+  verifyEmailService,
+} from '../../services/auth/registerService';
 
 
 type RegisterScreenNavigationProp = StackNavigationProp<StackParamList, 'Register'>;
@@ -92,33 +94,13 @@ const RegisterScreen: React.FC<Props> = ({ navigation, route }) => {
     setErrorMessage('');
 
     try {
-      const response = await axios.patch(
-          `http://${IP_ADDRESS}:3000/api/users/register`,
-          {
-            name : username,
-            email,
-            phoneNumber : mobile,
-            password : newPassword,
-            role : role1,
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-      );
-
-      const { token, role } = response.data;
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('role');
-      await AsyncStorage.setItem('token',token);
-      await AsyncStorage.setItem('role',role);
+      const role = await handleSignupService(username, email, mobile, newPassword, role1);
       if (role === 'admin') {
-          navigation.replace('AdminTabNav');
+        navigation.replace('AdminTabNav');
       } else if (role === 'seller') {
-          navigation.replace('SellerTabNav');
-      } else if (role === 'buyer') {
-          navigation.replace('BuyerTabNav');
+        navigation.replace('SellerTabNav');
+      } else {
+        navigation.replace('BuyerTabNav');
       }
 
     } catch (error: any) {
@@ -180,15 +162,7 @@ console.log('RegisterScreen - handleSignup');
     setLoading(true);
     // if (!isResendEnabled) {return;}
     try {
-      await axios.post(
-        `http://${IP_ADDRESS}:3000/api/users/otp`,
-        { email },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      await sendOtpService(email);
       startTimer();
       return true;
     } catch (error: any) {
@@ -206,22 +180,15 @@ console.log('RegisterScreen - handleSignup');
   const verification = async () => {
     setLoading(true);
     try {
-      const res = await axios.post(
-        `http://${IP_ADDRESS}:3000/api/users/verify-email`,
-        { email, otp },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      if(!res.data.success) {
+      const success = await verifyEmailService(email, otp);
+      if (!success) {
         Alert.alert('Error', 'Failed to verify email. Please try again.');
         setModalVisible(false);
+        return;
       }
       setIsEmailVerified(true);
       setModalVisible(false);
-      Alert.alert('Success', 'Email verified successful. Please signup.');
+      Alert.alert('Success', 'Email verified successfully. Please signup.');
     } catch (error: any) {
       if (error.response?.data?.message) {
         Alert.alert('Error', error.response.data.message);

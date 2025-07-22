@@ -8,15 +8,13 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import { IP_ADDRESS } from '@env';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import isValidEmail from '../../utils/isValidEmail';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Colors from '../../context/colors';
-import styles from '../../styles/auth/LoginScreenStyle';
+import styles from '../../styles/auth/loginScreenStyle';
+import { loginUser } from '../../services/auth/loginService';
 
 
 type LoginScreenNavigationProp = StackNavigationProp<StackParamList, 'Login'>;
@@ -35,8 +33,7 @@ const LoginScreen: React.FC<Props> = ({navigation}) => {
   const partnest_logo = require('../../assets/icons/partnest_logo.png');
 
   const handleLogin = async () => {
-
-console.log('LoginScreen - handleLogin');
+    console.log('LoginScreen - handleLogin');
 
     if (!email || !password) {
       setError('Please enter both email and password.');
@@ -52,44 +49,22 @@ console.log('LoginScreen - handleLogin');
     setError('');
 
     try {
-      const response = await axios.post(
-          `http://${IP_ADDRESS}:3000/api/users/login`,
-          { email, password },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-      );
+      const { role } = await loginUser(email, password);
 
-      const { token, role, id } = response.data;
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('role');
-      await AsyncStorage.removeItem('id');
-      await AsyncStorage.setItem('token',token);
-      await AsyncStorage.setItem('role',role);
-      await AsyncStorage.setItem('id', id);
       if (role === 'admin') {
-          navigation.replace('AdminTabNav');
+        navigation.replace('AdminTabNav');
       } else if (role === 'seller') {
-          navigation.replace('SellerTabNav');
+        navigation.replace('SellerTabNav');
       } else if (role === 'buyer') {
-          navigation.replace('BuyerTabNav');
+        navigation.replace('BuyerTabNav');
       }
-
-    } catch (error: any) {
-      if (error.response) {
-        setError(`Server error: ${error.response.data.message || 'Unknown error'}`);
-      } else if (error.request) {
-        setError('No response from server.');
-      } else {
-        setError(`Error: ${error.message}`);
-      }
-
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

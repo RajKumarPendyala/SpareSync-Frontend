@@ -7,14 +7,12 @@ import {
   Alert,
   Pressable,
 } from 'react-native';
-import axios from 'axios';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Colors from '../../context/colors';
-import { IP_ADDRESS } from '@env';
-import styles from '../../styles/common/OrderScreenStyle';
+import styles from '../../styles/common/orderScreenStyle';
+import { fetchOrdersService } from '../../services/common/orderService';
 
 
 type  BuyerOrderScreenNavigationProp = StackNavigationProp<StackParamList, 'BuyerTabNav'>;
@@ -29,40 +27,17 @@ const OrderScreen: React.FC = () => {
   const navigation = useNavigation<BuyerOrderScreenNavigationProp>();
 
   const fetchOrders = async (status: string = 'all') => {
-    try {
-      setLoading(true);
-      const token = await AsyncStorage.getItem('token');
-      const role = await AsyncStorage.getItem('role');
-      setRole(role);
+    setLoading(true);
+    const result = await fetchOrdersService(status);
 
-      if (role === 'admin') {
-        const url = status === 'all'
-        ? `http://${IP_ADDRESS}:3000/api/users/orders/admin`
-        : `http://${IP_ADDRESS}:3000/api/users/orders/admin?status=${status}`;
-
-        const res = await axios.get(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        setOrders(res.data.orders);
-      }else {
-        const url = status === 'all'
-        ? `http://${IP_ADDRESS}:3000/api/users/orders`
-        : `http://${IP_ADDRESS}:3000/api/users/orders?status=${status}`;
-
-        const res = await axios.get(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        console.log(res);
-        setOrders(res.data.orders);
-      }
-    } catch (error: any) {
-      console.error('Error fetching orders:', error?.response?.data || error.message);
-      Alert.alert('Failed to fetch orders');
-    } finally {
-      setLoading(false);
+    if (result.success) {
+      setOrders(result.data);
+      setRole(result.role  ?? null);
+    } else {
+      Alert.alert(result.message || 'Something went wrong while fetching orders');
     }
+
+    setLoading(false);
   };
 
   useFocusEffect(

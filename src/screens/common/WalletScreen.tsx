@@ -6,7 +6,7 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import styles from '../../styles/common/WalletScreenStyles';
+import styles from '../../styles/common/walletScreenStyles';
 import PrimaryButton from '../../components/primaryButton';
 import SecondaryButton from '../../components/secondaryButton';
 import { useProfile } from '../../context/ProfileContext';
@@ -15,7 +15,7 @@ import {
   updateWalletBalance,
   connectWalletSocket,
   disconnectWalletSocket,
-} from '../../services/WalletService';
+} from '../../services/common/walletService';
 
 const quickAmounts = [100, 1000, 10000, 200, 2000, 20000, 500, 5000, 50000];
 

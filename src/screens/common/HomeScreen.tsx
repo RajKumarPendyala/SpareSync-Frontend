@@ -14,11 +14,11 @@ import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { IP_ADDRESS } from '@env';
-import axios from 'axios';
 import { useSpareParts } from '../../context/SparePartsContext';
 import Colors from '../../context/colors';
-import styles from '../../styles/common/HomeScreenStyle';
+import styles from '../../styles/common/homeScreenStyle';
+import { fetchSparePartsService, addToCartService } from '../../services/common/homeService';
+
 
 
 type RootStackNavigationProp = StackNavigationProp<StackParamList, 'BuyerTabNav'>;
@@ -32,49 +32,21 @@ const categories = [
   { id: '6', name: 'Entertainment Devices', icon: 'television', value: 'Entertainment&MediaDevices' },
 ];
 
-const BuyerHomeScreen: React.FC = () => {
+const HomeScreen: React.FC = () => {
   const navigation = useNavigation<RootStackNavigationProp>();
   const [showMenu, setShowMenu] = useState(false);
   const [role, setRole] = useState<null | string>(null);
   const { spareParts, setSpareParts } = useSpareParts(); // use context
 
-    const fetchSpareParts = async () => {
-      try {
-          const token = await AsyncStorage.getItem('token');
-          const roleName = await AsyncStorage.getItem('role');
-          setRole(roleName);
-
-          if (roleName === 'seller') {
-            const response = await axios.get(
-              `http://${IP_ADDRESS}:3000/api/users/products/seller`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-
-console.log('daata',response);
-            setSpareParts(response.data.SpareParts || []);
-            return;
-          }
-
-          const response = await axios.get(
-            `http://${IP_ADDRESS}:3000/api/users/products/`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-        );
-
-console.log('daata',response);
-
-        setSpareParts(response.data.SpareParts || []);
-      } catch (error) {
-        console.error('Error fetching spare parts:', error);
-      }
-    };
+  const fetchSpareParts = async () => {
+    try {
+      const { role: roleName, sparePart } = await fetchSparePartsService();
+      setRole(roleName);
+      setSpareParts(sparePart);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
 
   useFocusEffect(
@@ -112,25 +84,11 @@ console.log('daata',response);
 
   const handleAddCart = async (item: any) => {
     try {
-
-console.log('BuyerScreen.handleAddCart');
-
-      const token = await AsyncStorage.getItem('token');
-      const response = await axios.post(
-        `http://${IP_ADDRESS}:3000/api/users/cart/items/`,
-        { sparePartId: item._id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.message) {
+      const message = await addToCartService(item._id);
+      if (message) {
         Alert.alert('Item added to cart successfully!');
       }
-    } catch (error: any) {
-      console.error('Error adding to cart:', error?.response?.data || error.message);
+    } catch (error) {
       Alert.alert('Failed to add item to cart.');
     }
   };
@@ -287,5 +245,5 @@ console.log('BuyerScreen.handleAddCart');
   );
 };
 
-export default BuyerHomeScreen;
+export default HomeScreen;
 

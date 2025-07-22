@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../../navigation/StackNavigator';
-import styles from '../../styles/auth/TermsAndConditionsScreenStyle';
+import styles from '../../styles/auth/termsAndConditionsScreenStyle';
 
 type Props = {
   navigation: StackNavigationProp<StackParamList, 'Terms'>;

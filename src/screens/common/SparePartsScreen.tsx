@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSpareParts } from '../../context/SparePartsContext';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Colors from '../../context/colors';
-import styles from '../../styles/common/SparePartsScreenStyle';
+import styles from '../../styles/common/sparePartsScreenStyle';
 
 
 type SparePartsRouteProp = RouteProp<StackParamList, 'SpareParts'>;
