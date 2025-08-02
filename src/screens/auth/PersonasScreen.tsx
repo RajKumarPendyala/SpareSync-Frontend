@@ -1,12 +1,16 @@
 import {
   View,
   Text,
-  TouchableOpacity,
   Image,
+  Dimensions,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../../navigation/StackNavigator';
 import styles from '../../styles/auth/personasScreenStyle';
+import PrimaryButton from '../../components/primaryButton';
+import SecondaryButton from '../../components/secondaryButton';
+
+const { width } = Dimensions.get('window');
 
 
 type PersonasScreenNavigationProp = StackNavigationProp<StackParamList, 'Personas'>;
@@ -23,15 +27,25 @@ const PersonasScreen: React.FC<Props> = ({ navigation }) => {
     <View style={styles.container}>
       <Image source={partnest_logo} style={styles.logo} resizeMode="contain" />
 
-      <TouchableOpacity style={styles.sellerButton} onPress={ () => navigation.navigate('Register', { role1 : 'seller' })}>
-        <Text style={styles.sellerText}>I am a Seller</Text>
-      </TouchableOpacity>
+      <PrimaryButton
+        title="I am a Seller"
+        width={width * 0.85}
+        height={45}
+        borderRadius={8}
+        onPress={() => navigation.navigate('Register', { role1 : 'seller' })}
+        viewStyle={styles.sellerButton}
+      />
 
       <Text style={styles.option}>OR</Text>
 
-      <TouchableOpacity style={styles.buyerButton} onPress={ () => navigation.navigate('Register', { role1 : 'buyer' })}>
-        <Text style={styles.buyerText}>I am a Buyer</Text>
-      </TouchableOpacity>
+      <SecondaryButton
+        title="I am a Buyer"
+        width={width * 0.85}
+        height={45}
+        borderRadius={8}
+        onPress={() => navigation.navigate('Register', { role1 : 'buyer' })}
+        viewStyle={styles.buyerButton}
+      />
     </View>
   );
 };

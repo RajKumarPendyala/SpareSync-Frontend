@@ -9,7 +9,6 @@ const styles = StyleSheet.create({
       backgroundColor: Colors.primary,
     },
     centered: {
-      flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -82,6 +81,9 @@ const styles = StyleSheet.create({
       marginHorizontal: 15,
       padding: 8,
       elevation: 2,
+    },
+    card3: {
+      paddingBottom: 375,
     },
     image: {
       width: width * 0.25,

@@ -58,13 +58,10 @@ const styles = StyleSheet.create({
     verifyButton: {
       paddingHorizontal: 10,
       paddingVertical: 6,
-      backgroundColor: Colors.primaryButtonBG,
-      borderRadius: 6,
       marginLeft: 8,
+      borderWidth: 0,
     },
     verifyText: {
-      color: Colors.primary,
-      fontWeight: '600',
       fontSize: 12,
     },
     icon: {
@@ -74,19 +71,7 @@ const styles = StyleSheet.create({
       marginLeft: 'auto',
     },
     signupButton: {
-      width: width * 0.85,
-      height: 45,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: Colors.primary,
-      backgroundColor: Colors.primaryButtonBG,
-      justifyContent: 'center',
-      alignItems: 'center',
       marginBottom: 15,
-    },
-    signupText: {
-      color: Colors.primary,
-      fontWeight: '600',
     },
     loginLink: {
       color: Colors.secondary,
@@ -121,16 +106,6 @@ const styles = StyleSheet.create({
       fontSize: 16,
       marginBottom: 20,
       textAlign: 'center',
-    },
-    closeButton: {
-      backgroundColor: '#ffebe6',
-      padding: 10,
-      borderRadius: 6,
-      alignItems: 'center',
-    },
-    closeText: {
-      color: '#d9534f',
-      fontWeight: '600',
     },
   });
 

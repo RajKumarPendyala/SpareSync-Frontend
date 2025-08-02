@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   Alert,
   Pressable,
 } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -17,7 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSpareParts } from '../../context/SparePartsContext';
 import Colors from '../../context/colors';
 import styles from '../../styles/common/homeScreenStyle';
-import { fetchSparePartsService, addToCartService } from '../../services/common/homeService';
+import { connectSparePartSocket, disconnectSparePartSocket, fetchSparePartsService, addToCartService } from '../../services/common/homeService';
 
 
 
@@ -38,22 +38,35 @@ const HomeScreen: React.FC = () => {
   const [role, setRole] = useState<null | string>(null);
   const { spareParts, setSpareParts } = useSpareParts(); // use context
 
-  const fetchSpareParts = async () => {
-    try {
-      const { role: roleName, sparePart } = await fetchSparePartsService();
-      setRole(roleName);
-      setSpareParts(sparePart);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  useEffect(() => {
+    const fetchSpareParts = async () => {
+      try {
+        const { role: roleName, sparePart } = await fetchSparePartsService();
+        const userId = await AsyncStorage.getItem('id');
+        setRole(roleName);
+        setSpareParts(sparePart);
 
+        if (!userId) {return;}
+        connectSparePartSocket(userId, (sparepart: any) => {
+          console.log(sparePart);
+          const updatedFiltered = roleName === 'seller'
+            ? sparepart.filter((part: any) => part.addedBy === userId)
+            : sparepart;
+          console.log(userId);
+          console.log(updatedFiltered);
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchSpareParts();
-    }, [])
-  );
+          setSpareParts(updatedFiltered);
+        });
+
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchSpareParts();
+    return () => {
+      disconnectSparePartSocket();
+    };
+  }, []);
 
 
 
@@ -106,7 +119,7 @@ const HomeScreen: React.FC = () => {
         ('') :
         (
           <View style={styles.header}>
-            <Text style={styles.logo}>SpareSync</Text>
+            <Text style={styles.logo}>PartNest</Text>
             {
               role === 'seller' ?
               (
@@ -159,7 +172,7 @@ const HomeScreen: React.FC = () => {
         />
       </View>
 
-      <View>
+      <View style={styles.card3}>
         {
           spareParts && spareParts.length > 0 ? (
             <FlatList

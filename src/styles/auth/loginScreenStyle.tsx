@@ -53,14 +53,6 @@ const styles = StyleSheet.create({
       color: Colors.primary,
     },
     loginButton: {
-      width: width * 0.85,
-      height: 45,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: Colors.primary,
-      backgroundColor: Colors.primaryButtonBG,
-      justifyContent: 'center',
-      alignItems: 'center',
       marginBottom: 15,
     },
     loginText: {

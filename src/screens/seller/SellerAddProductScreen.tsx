@@ -8,12 +8,12 @@ import {
   Image,
   Alert,
   ActivityIndicator,
-  Button,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useSpareParts } from '../../context/SparePartsContext';
+// import { useSpareParts } from '../../context/SparePartsContext';
 import pickAndUploadImage from '../../utils/pickAndUploadImage';
 import styles from '../../styles/seller/editProductScreenStyle';
+import PrimaryButton from '../../components/primaryButton';
 import { validateSparePartForAdd, addSparePart } from '../../services/seller/sellerAddProductService';
 
 const SellerAddProductScreen = () => {
@@ -21,7 +21,7 @@ const SellerAddProductScreen = () => {
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [newImageUrls, setNewImageUrls] = useState<string[]>([]);
-  const { spareParts, setSpareParts } = useSpareParts();
+  // const { spareParts, setSpareParts } = useSpareParts();
 
   const [sparePart, setSparePart] = useState<any>({
     name: '',
@@ -87,7 +87,7 @@ const SellerAddProductScreen = () => {
     setLoading(false);
 
     if (result.success) {
-      setSpareParts([...spareParts, result.createdSparePart]);
+      // setSpareParts([result.createdSparePart, ...spareParts]);
       Alert.alert('Success', result.message);
       navigation.goBack();
     } else {
@@ -277,8 +277,9 @@ const SellerAddProductScreen = () => {
         </TouchableOpacity>
       </ScrollView>
 
-      <Button title="Add Product"
-      onPress={handleSave}
+      <PrimaryButton
+        title="Add Product"
+        onPress={handleSave}
       />
     </ScrollView>
   );

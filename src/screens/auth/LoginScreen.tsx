@@ -5,8 +5,8 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  ActivityIndicator,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import isValidEmail from '../../utils/isValidEmail';
@@ -15,6 +15,9 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import Colors from '../../context/colors';
 import styles from '../../styles/auth/loginScreenStyle';
 import { loginUser } from '../../services/auth/loginService';
+import PrimaryButton from '../../components/primaryButton';
+
+const { width } = Dimensions.get('window');
 
 
 type LoginScreenNavigationProp = StackNavigationProp<StackParamList, 'Login'>;
@@ -49,9 +52,12 @@ const LoginScreen: React.FC<Props> = ({navigation}) => {
     setError('');
 
     try {
-      const { role } = await loginUser(email, password);
+      const { role, isDeleted } = await loginUser(email, password);
 
-      if (role === 'admin') {
+      if (isDeleted) {
+        setError('Your account has been deactivated.');
+      }
+      else if (role === 'admin') {
         navigation.replace('AdminTabNav');
       } else if (role === 'seller') {
         navigation.replace('SellerTabNav');
@@ -59,7 +65,8 @@ const LoginScreen: React.FC<Props> = ({navigation}) => {
         navigation.replace('BuyerTabNav');
       }
     } catch (err: any) {
-      setError(err.message);
+      console.log('login error message: ', err.message);
+      setError('Please enter a valid credentials.');
     } finally {
       setLoading(false);
     }
@@ -118,12 +125,13 @@ const LoginScreen: React.FC<Props> = ({navigation}) => {
           <Text style={styles.forgotText}>Forgot Password ?</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
-        {
-          loading ? ( <ActivityIndicator size="small" color={Colors.background} /> ) :
-          ( <Text style={styles.loginText}>Login</Text> )
-        }
-      </TouchableOpacity>
+      <PrimaryButton
+        title="Login"
+        width={width * 0.85}
+        onPress={handleLogin}
+        loading={loading}
+        viewStyle={styles.loginButton}
+      />
 
       <TouchableOpacity onPress={()=> navigation.navigate('Personas')}>
           <Text style={styles.registerText}>Don't have an account ?</Text>

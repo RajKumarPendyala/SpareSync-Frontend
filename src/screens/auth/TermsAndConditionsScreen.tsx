@@ -3,12 +3,12 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
   Image,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../../navigation/StackNavigator';
 import styles from '../../styles/auth/termsAndConditionsScreenStyle';
+import PrimaryButton from '../../components/primaryButton';
 
 type Props = {
   navigation: StackNavigationProp<StackParamList, 'Terms'>;
@@ -72,9 +72,13 @@ const TermsAndConditionsScreen: React.FC<Props> = ({ navigation }) => {
         </Text>
       </ScrollView>
 
-      <TouchableOpacity style={styles.acceptBtn} onPress={() => navigation.goBack()}>
-        <Text style={styles.acceptText}>Accept & Continue</Text>
-      </TouchableOpacity>
+      <PrimaryButton
+          title="Accept & Continue"
+          onPress={() => navigation.goBack()}
+          borderRadius={8}
+          viewStyle={styles.acceptBtn}
+          textStyle={styles.acceptText}
+        />
     </View>
   );
 };

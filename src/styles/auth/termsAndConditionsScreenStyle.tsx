@@ -39,18 +39,11 @@ const styles = StyleSheet.create({
       lineHeight: 20,
     },
     acceptBtn: {
-      backgroundColor: Colors.primaryButtonBG,
-      borderColor: Colors.primary,
-      borderWidth: 1,
-      borderRadius: 8,
       paddingVertical: 12,
-      alignItems: 'center',
       marginTop: 10,
       marginBottom: 20,
     },
     acceptText: {
-      color: Colors.primary,
-      fontWeight: '600',
       fontSize: 16,
     },
   });

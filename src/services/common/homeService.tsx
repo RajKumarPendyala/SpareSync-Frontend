@@ -2,6 +2,9 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IP_ADDRESS } from '@env';
 
+import io from 'socket.io-client';
+let socket: any;
+
 export const fetchSparePartsService = async () => {
   try {
     const token = await AsyncStorage.getItem('token');
@@ -45,5 +48,24 @@ export const addToCartService = async (sparePartId: string) => {
   } catch (error: any) {
     console.error('Error adding to cart:', error?.response?.data || error.message);
     throw new Error('Failed to add item to cart');
+  }
+};
+
+
+export const connectSparePartSocket = (userId: string, setSpareparts: (sparepart: any) => void) => {
+  // ⚡ Connect socket with userId
+  socket = io(`http://${IP_ADDRESS}:3000`, {
+    query: { userId },
+  });
+
+  // 📡 Listen
+  socket.on('sparePart', ({ sparepart }: { sparepart: any }) => {
+    setSpareparts(sparepart);
+  });
+};
+
+export const disconnectSparePartSocket = () => {
+  if (socket) {
+    socket.disconnect();
   }
 };

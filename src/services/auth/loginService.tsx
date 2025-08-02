@@ -6,6 +6,7 @@ interface LoginResponse {
   token: string;
   role: 'admin' | 'seller' | 'buyer';
   id: string;
+  isDeleted: boolean;
 }
 
 export const loginUser = async (email: string, password: string): Promise<LoginResponse> => {
@@ -20,7 +21,7 @@ export const loginUser = async (email: string, password: string): Promise<LoginR
       }
     );
 
-    const { token, role, id } = response.data;
+    const { token, role, id, isDeleted } = response.data;
 
     // Clear old data before setting new session
     await AsyncStorage.multiRemove(['token', 'role', 'id']);
@@ -30,7 +31,7 @@ export const loginUser = async (email: string, password: string): Promise<LoginR
       ['id', id],
     ]);
 
-    return { token, role, id };
+    return { token, role, id, isDeleted };
   } catch (error: any) {
     const message =
       error.response?.data?.message

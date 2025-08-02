@@ -41,19 +41,7 @@ const styles = StyleSheet.create({
       fontSize: 16,
     },
     sendButton: {
-      width: width * 0.85,
-      height: 45,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: Colors.primary,
-      backgroundColor: Colors.primaryButtonBG,
-      justifyContent: 'center',
-      alignItems: 'center',
       marginTop: 10,
-    },
-    sendText: {
-      color: Colors.primary,
-      fontWeight: '600',
     },
     errorText: {
       color: Colors.secondary,

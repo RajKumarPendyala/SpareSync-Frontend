@@ -3,10 +3,9 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   Image,
   ScrollView,
-  ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StackParamList } from '../../navigation/StackNavigator';
@@ -15,8 +14,9 @@ import isValidEmail from '../../utils/isValidEmail';
 import Colors from '../../context/colors';
 import styles from '../../styles/auth/forgotPasswordScreenStyle';
 import { sendForgotPasswordRequest } from '../../services/auth/forgotPasswordService';
+import PrimaryButton from '../../components/primaryButton';
 
-
+const { width } = Dimensions.get('window');
 
 type PasswordResetScreenNavigationProp = StackNavigationProp<StackParamList, 'PasswordReset'>;
 
@@ -35,12 +35,12 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
     console.log('forgotPasswordScreen - handleSend');
 
     if (!email) {
-      setErrorMessage('Please enter your email address.');
+      setErrorMessage('Please enter your email.');
       return;
     }
 
     if (!isValidEmail(email)) {
-      setErrorMessage('Please enter a valid email address.');
+      setErrorMessage('Please enter a valid email.');
       return;
     }
 
@@ -80,12 +80,17 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
 
       {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
-      <TouchableOpacity style={styles.sendButton} onPress={handleSend} disabled={loading}>
-        {
-          loading ? ( <ActivityIndicator size="small" color={Colors.background} /> ) :
-          ( <Text style={styles.sendText}>Send</Text> )
-        }
-      </TouchableOpacity>
+      <PrimaryButton
+        title="Send"
+        loading={loading}
+        width={width * 0.85}
+        onPress={handleSend}
+        disabled={loading}
+        height={45}
+        borderRadius={8}
+        viewStyle={styles.sendButton}
+      />
+
     </ScrollView>
   );
 };

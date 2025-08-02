@@ -10,6 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Dimensions,
 } from 'react-native';
 import isValidEmail from '../../utils/isValidEmail';
 import validatePassword  from '../../utils/validatePassword';
@@ -19,12 +20,15 @@ import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Colors from '../../context/colors';
 import styles from '../../styles/auth/registerScreenStyle';
+import PrimaryButton from '../../components/primaryButton';
+import SecondaryButton from '../../components/secondaryButton';
 import {
   handleSignupService,
   sendOtpService,
   verifyEmailService,
 } from '../../services/auth/registerService';
 
+const { width } = Dimensions.get('window');
 
 type RegisterScreenNavigationProp = StackNavigationProp<StackParamList, 'Register'>;
 
@@ -191,7 +195,8 @@ console.log('RegisterScreen - handleSignup');
       Alert.alert('Success', 'Email verified successfully. Please signup.');
     } catch (error: any) {
       if (error.response?.data?.message) {
-        Alert.alert('Error', error.response.data.message);
+        console.log('Error: ', error.response.data.message);
+        Alert.alert('Error', 'Failed to verify email. Please try again.');
       } else {
         Alert.alert('Error', 'Something went wrong. Please try again.');
       }
@@ -241,16 +246,15 @@ console.log('RegisterScreen - handleSignup');
           autoCapitalize="none"
           onChangeText={setEmail}
         />
-        <TouchableOpacity style={styles.verifyButton}
+        <PrimaryButton
+          title={isEmailVerified ? 'verified' : 'verify'}
+          disabled={loading}
           onPress={modal}
-          disabled={loading}>
-          {
-            loading ? ( <ActivityIndicator size="small" color={Colors.background} /> ) :
-            ( <Text style={styles.verifyText}>
-              {isEmailVerified ? 'verified' : 'verify'}
-              </Text> )
-          }
-        </TouchableOpacity>
+          loading={loading}
+          borderRadius={6}
+          textStyle={styles.verifyText}
+          viewStyle={styles.verifyButton}
+        />
       </View>
 
       <Modal
@@ -285,16 +289,12 @@ console.log('RegisterScreen - handleSignup');
               }
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.closeButton}
+            <SecondaryButton
+              title="Verify"
+              disabled={loading}
               onPress={verification}
-              disabled={loading}>
-              {
-                (loading && !isEmailVerified) ? ( <ActivityIndicator size="small" color={Colors.background} /> ) :
-                ( <Text style={styles.closeText}>
-                    {isEmailVerified ? 'Verified' : 'Verify'}
-                  </Text> )
-              }
-            </TouchableOpacity>
+              loading={loading && !isEmailVerified}
+            />
           </View>
         </View>
       </Modal>
@@ -346,12 +346,16 @@ console.log('RegisterScreen - handleSignup');
         </View>
       ) : null}
 
-      <TouchableOpacity style={styles.signupButton} onPress={handleSignup} disabled={loading}>
-        {
-          (loading && isEmailVerified) ? ( <ActivityIndicator size="small" color={Colors.background} /> ) :
-          ( <Text style={styles.signupText}>Signup</Text> )
-        }
-      </TouchableOpacity>
+      <PrimaryButton
+        title="Signup"
+        width={width * 0.85}
+        height={45}
+        disabled={loading}
+        borderRadius={8}
+        onPress={handleSignup}
+        loading={loading && isEmailVerified}
+        viewStyle={styles.signupButton}
+      />
 
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
         <Text style={styles.loginLink}>Already have an account?</Text>

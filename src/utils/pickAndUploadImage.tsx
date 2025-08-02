@@ -18,8 +18,8 @@ const pickAndUploadImage = async (): Promise<string | null> => {
   const data = new FormData();
   data.append('file', {
     uri: image.uri,
-    type: image.type,
-    name: image.fileName,
+    type: image.type || 'image/jpeg',
+    name: image.fileName || 'upload.jpg',
   } as any);
   data.append('upload_preset', UPLOAD_PRESET);
   data.append('cloud_name', CLOUD_NAME);
@@ -28,12 +28,21 @@ const pickAndUploadImage = async (): Promise<string | null> => {
     const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
       method: 'POST',
       body: data,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
 
     const json = await res.json();
     console.log(json.secure_url);
 
-    return json.secure_url;
+    if (json.secure_url) {
+      console.log('Cloudinary URL:', json.secure_url);
+      return json.secure_url;
+    } else {
+      console.error('Cloudinary upload error:', json);
+      return null;
+    }
   } catch (err) {
     console.error('Upload failed', err);
     return null;
