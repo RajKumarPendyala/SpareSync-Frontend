@@ -3,13 +3,11 @@ import { View, FlatList, Text, TouchableOpacity, Image, Alert, Modal, Pressable 
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { IP_ADDRESS } from '@env';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSpareParts } from '../../context/SparePartsContext';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Colors from '../../context/colors';
 import styles from '../../styles/common/sparePartsScreenStyle';
+import { addSparePartToCart } from '../../services/common/sparePartsService';
 
 
 type SparePartsRouteProp = RouteProp<StackParamList, 'SpareParts'>;
@@ -48,22 +46,9 @@ const SparePartsScreen: React.FC = () => {
 
   const handleAddCart = async (item: any) => {
     try {
-
-console.log('SparePartsScreen.handleAddCart');
-
-      const token = await AsyncStorage.getItem('token');
-
-      const response = await axios.post(
-        `http://${IP_ADDRESS}:3000/api/users/cart/items/`,
-        { sparePartId: item._id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.message) {
+      console.log('SparePartsScreen.handleAddCart');
+      const data = await addSparePartToCart(item._id);
+      if (data.message) {
         Alert.alert('Item added to cart successfully!');
       }
     } catch (error: any) {

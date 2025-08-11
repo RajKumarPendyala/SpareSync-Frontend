@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,8 @@ import {
   fetchConversationService,
   sendMessageService,
   deleteConversationService,
+  connectConversationSocket,
+  disconnectConversationSocket,
 } from '../../services/common/chatDetailService';
 
 
@@ -52,8 +54,23 @@ const ChatDetailScreen = () => {
   useFocusEffect(
     useCallback(() => {
       fetchConversation();
+
+      return () => {
+        disconnectConversationSocket();
+      };
     }, [])
   );
+
+
+  useEffect(() => {
+    if (currentUserId) {
+      connectConversationSocket(currentUserId, (conversation: any) => {
+        setMessages(conversation.messages);
+        flatListRef.current?.scrollToEnd({ animated: true });
+      });
+    }
+  }, [currentUserId]);
+
 
   const handleDelete = async () => {
     Alert.alert(
@@ -94,9 +111,7 @@ const ChatDetailScreen = () => {
     }
 
     try {
-      const data = await sendMessageService(otherParticipant._id, message);
-      const newMessage = data.conversation.messages.slice(-1)[0];
-      setMessages(prev => [...prev, newMessage]);
+      await sendMessageService(otherParticipant._id, message);
 
       setMessage('');
       flatListRef.current?.scrollToEnd({ animated: true });

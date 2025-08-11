@@ -8,7 +8,6 @@ import {
   Image,
   Alert,
   ActivityIndicator,
-  Button,
 } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { useSpareParts } from '../../context/SparePartsContext';
@@ -16,6 +15,7 @@ import { StackParamList } from '../../navigation/StackNavigator';
 import pickAndUploadImage from '../../utils/pickAndUploadImage';
 import styles from '../../styles/seller/editProductScreenStyle';
 import { validateSparePart, updateSparePart } from '../../services/seller/sellerEditProductService';
+import PrimaryButton from '../../components/primaryButton';
 
 
 
@@ -164,7 +164,7 @@ const EditProductScreen = () => {
             keyboardType="numeric"
             value={sparePart.price?.$numberDecimal ?? ''}
             onChangeText={(text) => {
-              if (/^\d*\.?\d*$/.test(text)) {
+              if (/^\d*\.?\d{0,2}$/.test(text)) {
                 setSparePart((prev: any) => ({
                   ...prev,
                   price: { $numberDecimal: text === '' ? '' : text },
@@ -183,11 +183,16 @@ const EditProductScreen = () => {
             keyboardType="numeric"
             value={sparePart.discount?.$numberDecimal ?? ''}
             onChangeText={(text) => {
-              if (/^\d*\.?\d*$/.test(text)) {
-                setSparePart((prev: any) => ({
-                  ...prev,
-                  discount: { $numberDecimal: text === '' ? '' : text },
-                }));
+              if (/^\d*\.?\d{0,2}$/.test(text)) {
+                const numeric = Number(text);
+                if (numeric <= 100) {
+                  setSparePart((prev: any) => ({
+                    ...prev,
+                    discount: { $numberDecimal: text === '' ? '' : text },
+                  }));
+                } else {
+                  Alert.alert('Validation Error', 'Discount cannot be more than 100%');
+                }
               }
             }}
           />
@@ -203,7 +208,9 @@ const EditProductScreen = () => {
             placeholderTextColor="#999"
             keyboardType="numeric"
             value={String(sparePart?.quantity ?? '')}
-            onChangeText={(text) => setSparePart({ ...sparePart, quantity: text })}
+            onChangeText={(text) =>
+              setSparePart({ ...sparePart, quantity: text === '' ? '' : Number(text) })
+            }
           />
         </View>
 
@@ -216,7 +223,7 @@ const EditProductScreen = () => {
             keyboardType="numeric"
             value={sparePart.weight?.$numberDecimal ?? ''}
             onChangeText={(text) => {
-              if (/^\d*\.?\d*$/.test(text)) {
+              if (/^\d*\.?\d{0,2}$/.test(text)) {
                 setSparePart((prev: any) => ({
                   ...prev,
                   weight: { $numberDecimal: text === '' ? '' : text },
@@ -273,7 +280,9 @@ const EditProductScreen = () => {
             placeholderTextColor="#999"
             keyboardType="numeric"
             value={String(sparePart.warrentyPeriod)}
-            onChangeText={(text) => setSparePart({ ...sparePart, warrentyPeriod: text })}
+            onChangeText={(text) =>
+              setSparePart({ ...sparePart, warrentyPeriod: text === '' ? '' : Number(text) })
+            }
           />
         </View>
       </View>
@@ -332,8 +341,9 @@ const EditProductScreen = () => {
         </TouchableOpacity>
       </ScrollView>
 
-      <Button title="Save Changes"
-      onPress={handleSave}
+      <PrimaryButton
+        title="SAVE CHANGES"
+        onPress={handleSave}
       />
     </ScrollView>
   );

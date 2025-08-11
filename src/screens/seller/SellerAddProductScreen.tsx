@@ -132,8 +132,9 @@ const SellerAddProductScreen = () => {
             placeholder="Enter price"
             placeholderTextColor="#999"
             keyboardType="numeric"
+            value={sparePart.price?.$numberDecimal ?? ''}
             onChangeText={(text) => {
-              if (/^\d*\.?\d*$/.test(text)) {
+              if (/^\d*\.?\d{0,2}$/.test(text)) {
                 setSparePart((prev: any) => ({
                   ...prev,
                   price: { $numberDecimal: text === '' ? '' : text },
@@ -143,6 +144,7 @@ const SellerAddProductScreen = () => {
           />
         </View>
 
+
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Discount %</Text>
           <TextInput
@@ -150,7 +152,20 @@ const SellerAddProductScreen = () => {
             placeholder="Enter discount"
             placeholderTextColor="#999"
             keyboardType="numeric"
-            onChangeText={(text) => setSparePart({ ...sparePart, discount: text })}
+            value={sparePart.discount?.$numberDecimal ?? ''}
+            onChangeText={(text) => {
+              if (/^\d*\.?\d{0,2}$/.test(text)) {
+                const numeric = Number(text);
+                if (numeric <= 100) {
+                  setSparePart((prev: any) => ({
+                    ...prev,
+                    discount: { $numberDecimal: text === '' ? '' : text },
+                  }));
+                } else {
+                  Alert.alert('Validation Error', 'Discount cannot be more than 100%');
+                }
+              }
+            }}
           />
         </View>
       </View>
@@ -166,6 +181,7 @@ const SellerAddProductScreen = () => {
               const numericValue = text.trim() === '' ? null : Number(text);
               setSparePart({ ...sparePart, quantity: numericValue });
             }}
+            value={sparePart.quantity?.toString() || ''}
           />
         </View>
 
@@ -175,7 +191,15 @@ const SellerAddProductScreen = () => {
             style={styles.halfInput}
             placeholder="Enter weight"
             keyboardType="numeric"
-            onChangeText={(text) => setSparePart({ ...sparePart, weight: text })}
+            value={sparePart.weight?.$numberDecimal ?? ''}
+            onChangeText={(text) => {
+              if (/^\d*\.?\d{0,2}$/.test(text)) {
+                setSparePart((prev: any) => ({
+                  ...prev,
+                  weight: { $numberDecimal: text === '' ? '' : text },
+                }));
+              }
+            }}
           />
         </View>
       </View>
@@ -218,7 +242,10 @@ const SellerAddProductScreen = () => {
             style={styles.halfInput}
             placeholder="Warranty period"
             keyboardType="numeric"
-            onChangeText={(text) => setSparePart({ ...sparePart, warrentyPeriod: text })}
+            onChangeText={(text) =>
+              setSparePart({ ...sparePart, warrentyPeriod: text === '' ? '' : Number(text) })
+            }
+            value={sparePart.warrentyPeriod?.toString() || ''}
           />
         </View>
       </View>
@@ -278,7 +305,7 @@ const SellerAddProductScreen = () => {
       </ScrollView>
 
       <PrimaryButton
-        title="Add Product"
+        title="ADD PRODUCT"
         onPress={handleSave}
       />
     </ScrollView>

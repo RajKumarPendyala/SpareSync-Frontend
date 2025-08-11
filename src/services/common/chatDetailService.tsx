@@ -2,6 +2,9 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IP_ADDRESS } from '@env';
 
+import io from 'socket.io-client';
+let socket: any;
+
 const BASE_URL = `http://${IP_ADDRESS}:3000/api/users`;
 
 export const fetchConversationService = async (conversationId: string) => {
@@ -43,4 +46,23 @@ export const deleteConversationService = async (otherUserId: string) => {
   );
 
   return response.data;
+};
+
+
+export const connectConversationSocket = (userId: string, setMessages: (conversation: any) => void) => {
+  // ⚡ Connect socket with userId
+  socket = io(`http://${IP_ADDRESS}:3000`, {
+    query: { userId },
+  });
+
+  socket.on('conversation', ({ conversation }: { conversation: any }) => {
+    console.log('socket:', conversation);
+    setMessages(conversation);
+  });
+};
+
+export const disconnectConversationSocket = () => {
+  if (socket) {
+    socket.disconnect();
+  }
 };

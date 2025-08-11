@@ -11,16 +11,18 @@ import {
   Modal,
 } from 'react-native';
 import { useProfile } from '../../context/ProfileContext';
-import axios from 'axios';
-import { IP_ADDRESS } from '@env';
 import pickAndUploadImage from '../../utils/pickAndUploadImage';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../../navigation/StackNavigator';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Colors from '../../context/colors';
-import validateMobile  from '../../utils/validateMobile';
 import styles from '../../styles/common/profileScreenStyle';
+import {
+  fetchUserProfile,
+  updateUserProfile,
+  logoutUser,
+  getUserRole,
+} from '../../services/common/profileService';
 
 
 type ProfileScreenNavigationProp = StackNavigationProp<StackParamList, 'Profile'>;
@@ -38,32 +40,20 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
   const [url, setUrl] = useState('');
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const loadProfile = async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
-        setRole(await AsyncStorage.getItem('role'));
-
-        const response = await axios.get(
-          `http://${IP_ADDRESS}:3000/api/users/profile`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-console.log(response);
-
+        setRole(await getUserRole());
+        const data = await fetchUserProfile();
         setProfile({
-          ...response.data.user,
-          image: response.data.user.image || { path: '' },
+          ...data.user,
+          image: data.user.image || { path: '' },
           address: {
             houseNo: '',
             street: '',
             postalCode: '',
             city: '',
             state: '',
-            ...response.data.user.address,
+            ...data.user.address,
           },
         });
       } catch (error) {
@@ -72,24 +62,19 @@ console.log(response);
       }
     };
 
-    fetchProfile();
+    loadProfile();
   }, [setProfile]);
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     Alert.alert(
       'Confirm Logout',
       'Are you sure you want to logout?',
       [
-        {
-          text: 'Cancel',
-          onPress: () => {},
-          style: 'cancel',
-        },
+        { text: 'Cancel', style: 'cancel' },
         {
           text: 'Logout',
           onPress: async () => {
-            await AsyncStorage.removeItem('token');
-            await AsyncStorage.removeItem('role');
+            await logoutUser();
             setShowMenu(false);
             navigation.replace('Login');
           },
@@ -114,56 +99,15 @@ console.log(response);
     }));
   };
 
+
   const handleSave = async () => {
     try {
-
-      if (!validateMobile(profile.phoneNumber)) {
-        Alert.alert('Error', 'Invalid mobile number.');
-        return;
-      }
-
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        Alert.alert('Error', 'User not authenticated.');
-        return;
-      }
-
+      const data = await updateUserProfile(profile, url);
+      Alert.alert('Success', 'Profile updated successfully.');
+      setProfile(data.user);
       setEditable(false);
-
-      const updateData: any = {
-        name: profile.name,
-        phoneNumber: profile.phoneNumber,
-        houseNo: profile.address.houseNo,
-        street: profile.address.street,
-        postalCode: profile.address.postalCode,
-        city: profile.address.city,
-        state: profile.address.state,
-      };
-
-      if (url) {
-        console.log(url);
-        updateData.imagePath = url;
-      }
-
-      const response = await axios.patch(
-        `http://${IP_ADDRESS}:3000/api/users/profile`,
-        { updateData },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        Alert.alert('Success', 'Profile updated successfully.');
-        setProfile(response.data.user);
-      } else {
-        Alert.alert('Error', 'Failed to update profile.');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Failed to update profile.');
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to update profile.');
       console.error('Profile update error:', error);
     }
   };

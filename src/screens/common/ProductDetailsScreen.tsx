@@ -12,11 +12,13 @@ import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 import { useSpareParts } from '../../context/SparePartsContext';
-import { IP_ADDRESS } from '@env';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import styles from '../../styles/common/productDetailsScreenStyle';
+import {
+  sendChatMessage,
+  addProductToCart,
+  deleteProduct,
+} from '../../services/common/productDetailsService';
 
 
 type BuyerProductDetailsScreenNavigationProp = StackNavigationProp<
@@ -36,7 +38,7 @@ interface Props {
 
 const ProductDetailsScreen: React.FC<Props> = ({ route }) => {
   const { partId, roleName } = route.params;
-console.log(partId);
+
     const { spareParts, setSpareParts } = useSpareParts();
 
   const navigation = useNavigation<BuyerProductDetailsScreenNavigationProp>();
@@ -52,46 +54,21 @@ console.log(partId);
   }
 
   const handleChatOption = async () => {
-    const token = await AsyncStorage.getItem('token');
-
     try {
-      const response = await axios.post(
-        `http://${IP_ADDRESS}:3000/api/users/conversations/message`,
-        {
-          senderId2: product.addedBy,
-          text: 'How Can I Help You!',
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      (navigation as StackNavigationProp<StackParamList, 'BuyerProductDetails'>).navigate('ChatDetail', { conversationId: response.data.conversation._id });
-
-
+      const data = await sendChatMessage(product.addedBy);
+      navigation.navigate('ChatDetail', {
+        conversationId: data.conversation._id,
+      });
     } catch (error: any) {
       console.error('Send message failed:', error?.response?.data || error.message);
       Alert.alert('Fail', 'Failed to enable chat option');
     }
   };
 
-  const handleAddCart = async (item: any) => {
+  const handleAddCart = async () => {
     try {
-
-console.log('SparePartsScreen.handleAddCart');
-
-      const token = await AsyncStorage.getItem('token');
-      const response = await axios.post(
-        `http://${IP_ADDRESS}:3000/api/users/cart/items/`,
-        { sparePartId: item._id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.message) {
+      const data = await addProductToCart(product._id);
+      if (data.message) {
         Alert.alert('Item added to cart successfully!');
       }
     } catch (error: any) {
@@ -100,36 +77,22 @@ console.log('SparePartsScreen.handleAddCart');
     }
   };
 
-  const handleDelete = async (item: any) => {
+  const handleDelete = () => {
     Alert.alert(
       'Confirm Delete',
       'Are you sure you want to delete product?',
       [
-        {
-          text: 'No',
-          onPress: () => {},
-          style: 'cancel',
-        },
+        { text: 'No', style: 'cancel' },
         {
           text: 'Yes',
           onPress: async () => {
             try {
-              const token = await AsyncStorage.getItem('token');
-
-              const response = await axios.patch(
-                `http://${IP_ADDRESS}:3000/api/users/products/seller`,
-                { _id: item._id, isDeleted: true },
-                {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                }
+              await deleteProduct(product._id);
+              setSpareParts((prevParts: any) =>
+                prevParts.filter((part: any) => part._id !== product._id)
               );
-              if (response.status === 200) {
-                setSpareParts((prevParts: any) => prevParts.filter((part: any) => part._id !== item._id));
-                Alert.alert('Success', 'Product deleted successfully');
-                navigation.goBack();
-              }
+              Alert.alert('Success', 'Product deleted successfully');
+              navigation.goBack();
             } catch (error: any) {
               console.error('Error deleting product:', error?.response?.data || error.message);
               Alert.alert('Failed to delete product.');
@@ -141,14 +104,13 @@ console.log('SparePartsScreen.handleAddCart');
       { cancelable: true }
     );
   };
-console.log('role name: ',roleName);
 
 
   return (
     <View style={styles.screen}>
       <ScrollView>
         <View style={styles.header}>
-          <Text style={styles.name}>{product.name}</Text>
+          <Text style={styles.name} numberOfLines={1}>{product.name}</Text>
           <Text style={styles.star}>
             <Icon
               name={ 'star'}
@@ -202,8 +164,23 @@ console.log('role name: ',roleName);
           <Text style={styles.label}>Type: <Text style={styles.value}>{product.gadgetType}</Text></Text>
           <Text style={styles.label}>Color: <Text style={styles.value}>{product.color || 'N/A'}</Text></Text>
           <Text style={styles.label}>Weight: <Text style={styles.value}>{product.weight ? parseFloat(product.weight.$numberDecimal).toFixed(2) + ' kg' : 'N/A'}</Text></Text>
-          <Text style={styles.label}>Warranty: <Text style={styles.value}>{product.warrentyPeriod || 0} months</Text></Text>
-          <Text style={styles.label}>Quantity Available: <Text style={styles.value}>{product.quantity}</Text></Text>
+          <Text style={styles.label}>
+            Warranty:{' '}
+            <Text style={styles.value}>
+              {typeof product.warrentyPeriod === 'number'
+                ? product.warrentyPeriod.toFixed(0) + ' months'
+                : 'N/A'}
+            </Text>
+          </Text>
+
+          <Text style={styles.label}>
+            Quantity Available:{' '}
+            <Text style={styles.value}>
+              {typeof product.quantity === 'number'
+                ? product.quantity.toFixed(0)
+                : 'N/A'}
+            </Text>
+          </Text>
           <Text style={styles.label}>Dimensions: <Text style={styles.value}>{product.dimension || 'N/A'}</Text></Text>
           <Text style={styles.descTitle}>Description</Text>
           <Text style={styles.description}>{product.description}</Text>
@@ -213,12 +190,11 @@ console.log('role name: ',roleName);
             product.reviews.map((review: any, index: number) => (
               <View key={index} style={styles.reviewContainer}>
                 <View style={styles.reviewHeader}>
+
                   <Image
-                    source={
-                      review.userImage?.path
-                        ? { uri: review.userImage?.path }
-                        : { uri: 'https://res.cloudinary.com/dxcbw424l/image/upload/v1749116154/rccjtgfk1lt74twuxo3b.jpg' }
-                    }
+                    source={{
+                      uri: review?.userImage?.path || 'https://res.cloudinary.com/dxcbw424l/image/upload/v1749116154/rccjtgfk1lt74twuxo3b.jpg',
+                    }}
                     style={styles.userImage}
                     onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
                   />
@@ -287,7 +263,7 @@ console.log('role name: ',roleName);
         (
           product.quantity >= 1 ?
           (
-            <TouchableOpacity style={styles.cartButton} onPress={() => handleAddCart(product)}>
+            <TouchableOpacity style={styles.cartButton} onPress={() => handleAddCart()}>
               <Text style={styles.cartButtonText}>Add to Cart</Text>
             </TouchableOpacity>
           )
@@ -300,7 +276,7 @@ console.log('role name: ',roleName);
         )
         :
         (
-          <TouchableOpacity style={styles.stockButton} onPress={() => handleDelete(product)}>
+          <TouchableOpacity style={styles.stockButton} onPress={() => handleDelete()}>
             <Text style={styles.cartButtonText}>Delete The Product</Text>
           </TouchableOpacity>
         )

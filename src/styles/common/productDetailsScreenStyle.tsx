@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
       flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
-      width,
+      // width: 370,
       padding: 20,
       marginTop: 40,
     },
@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
       height: 42,
       borderRadius: 21,
       marginRight: 15,
+      resizeMode: 'cover',
     },
     userInfo: {
       flexDirection: 'column',

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import styles from '../../styles/common/chatScreenStyle';
-import { fetchConversations } from '../../services/common/chatService';
+import { fetchConversations, disconnectConversationsSocket, connectConversationsSocket } from '../../services/common/chatService';
 
 
 type Conversation = {
@@ -51,8 +51,19 @@ const ChatScreen = () => {
   useFocusEffect(
     useCallback(() => {
       loadConversations();
+
+      return () => {
+        disconnectConversationsSocket();
+      };
     }, [])
   );
+
+  useEffect(() => {
+    if (currentUserId) {
+      connectConversationsSocket(currentUserId, (chats: any) => setConversations(chats), (id: any) => setCurrentUserId(id));
+    }
+  }, [currentUserId]);
+
 
   const renderItem = ({ item }: { item: Conversation }) => {
     const today = new Date();
