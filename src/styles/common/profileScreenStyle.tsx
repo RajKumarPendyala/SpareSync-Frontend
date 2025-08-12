@@ -13,6 +13,15 @@ const styles = StyleSheet.create({
       paddingVertical: 8,
       paddingHorizontal: 10,
     },
+    email: {
+      borderBottomWidth: 1,
+      borderColor: '#D1D5DB',
+      marginBottom: 15,
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+      color:'rgba(0,0,0,0.38)',
+      backgroundColor: '#E5E7EB',
+    },
     sectionTitle: {
       fontSize: 16,
       fontWeight: 'bold',

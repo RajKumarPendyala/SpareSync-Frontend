@@ -65,8 +65,11 @@ const WalletScreen = () => {
 
   const handleAddInputAmount = () => {
     const amount = parseFloat(inputAmount);
-    if (!amount || amount <= 0) {
+    if (amount <= 0) {
       return Alert.alert('Invalid', 'Enter a valid amount');
+    }
+    if(!amount) {
+      return;
     }
     Alert.alert('Confirm', `Add ₹${amount}?`, [
       { text: 'Cancel', style: 'cancel' },

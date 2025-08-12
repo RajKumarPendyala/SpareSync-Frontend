@@ -9,12 +9,12 @@ const styles = StyleSheet.create({
       backgroundColor: Colors.background,
     },
     header: {
-      flex: 1,
       flexDirection: 'row',
-      alignItems: 'center',
-      // width: 370,
-      padding: 20,
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
       marginTop: 40,
+      marginBottom: 10,
     },
     star: {
       flex: 1,
@@ -22,10 +22,20 @@ const styles = StyleSheet.create({
       color: Colors.primary,
     },
     image: {
-      marginLeft: 10,
-      width : width * 0.9,
+      width,
       height: width * 0.7,
       resizeMode: 'cover',
+    },
+    pagination: {
+      flexDirection: 'row',
+      alignSelf: 'center',
+      marginTop: 8,
+    },
+    dot: {
+      height: 8,
+      width: 8,
+      borderRadius: 4,
+      marginHorizontal: 4,
     },
     detailsContainer: {
       padding: 20,
@@ -33,6 +43,20 @@ const styles = StyleSheet.create({
     name: {
       fontSize: 22,
       fontWeight: '700',
+      color: Colors.black,
+      flexShrink: 1,
+      maxWidth: '90%',
+    },
+    ratingContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginLeft: 8,
+    },
+    ratingText: {
+      marginLeft: 4,
+      fontSize: 14,
+      color: Colors.primary,
+      fontWeight: '500',
     },
     priceDiscount: {
       flex: 1,

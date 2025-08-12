@@ -5,10 +5,12 @@ import validatePassword from '../../utils/validatePassword';
 import Colors from '../../context/colors';
 import styles from '../../styles/common/changePasswordScreenstyle';
 import { changePasswordService } from '../../services/common/changePasswordService';
+import { useNavigation } from '@react-navigation/native';
 
 
 
 const ChangePasswordScreen = () => {
+  const navigation = useNavigation();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -45,7 +47,12 @@ const ChangePasswordScreen = () => {
           setCurrentPassword('');
           setNewPassword('');
           setConfirmPassword('');
-          Alert.alert('Success', 'Password changed successfully.');
+          Alert.alert('Success', 'Password changed successfully.', [
+            {
+              text: 'OK',
+              onPress: () => navigation.goBack(),
+            },
+          ]);
         }
 
     } catch (error: any) {

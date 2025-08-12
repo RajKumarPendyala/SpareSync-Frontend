@@ -32,6 +32,7 @@ const ChatDetailScreen = () => {
   const [currentUserId, setCurrentUserId] = useState('');
   const [otherParticipant, setOtherParticipant] = useState(Object);
   const [message, setMessage] = useState('');
+  const [inputHeight, setInputHeight] = useState(40);
   const [showMenu, setShowMenu] = useState(false);
 
   const flatListRef = useRef<FlatList>(null);
@@ -190,7 +191,12 @@ const ChatDetailScreen = () => {
           placeholder="Type your message..."
           value={message}
           onChangeText={setMessage}
-          style={styles.input}
+          style={[styles.input, { height: inputHeight }]}
+          multiline={true}
+          textAlignVertical="top"
+          onContentSizeChange={(e) =>
+            setInputHeight(Math.min(e.nativeEvent.contentSize.height, 120)) // limit max height
+          }
         />
         <TouchableOpacity onPress={handleSend} style={styles.send}>
           <Icon name="send" size={24} color={Colors.primary} />

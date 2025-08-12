@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -37,9 +37,19 @@ interface Props {
 }
 
 const ProductDetailsScreen: React.FC<Props> = ({ route }) => {
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const onViewRef = useRef(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) {
+      setCurrentIndex(viewableItems[0].index);
+    }
+  });
+  const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
+
+
   const { partId, roleName } = route.params;
 
-    const { spareParts, setSpareParts } = useSpareParts();
+  const { spareParts, setSpareParts } = useSpareParts();
 
   const navigation = useNavigation<BuyerProductDetailsScreenNavigationProp>();
 
@@ -110,22 +120,25 @@ const ProductDetailsScreen: React.FC<Props> = ({ route }) => {
     <View style={styles.screen}>
       <ScrollView>
         <View style={styles.header}>
-          <Text style={styles.name} numberOfLines={1}>{product.name}</Text>
-          <Text style={styles.star}>
-            <Icon
-              name={ 'star'}
-              size={16}
-              color="#f1c40f"
-            />
-            {product.averageRating || 0}/5
+          <Text style={styles.name} numberOfLines={2}>
+            {product.name}
           </Text>
+          <View style={styles.ratingContainer}>
+            <Icon name="star" size={16} color="#f1c40f" />
+            <Text style={styles.ratingText}>
+              {product.averageRating || 0}/5
+            </Text>
+          </View>
         </View>
+
 
         <FlatList
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
-          data={product.images}
+          data={product.images && product.images.length > 0
+            ? product.images
+            : [{ path: null }]}
           keyExtractor={(_, i) => i.toString()}
           renderItem={({ item }) => (
             <Image
@@ -138,7 +151,22 @@ const ProductDetailsScreen: React.FC<Props> = ({ route }) => {
               onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
             />
           )}
+          onViewableItemsChanged={onViewRef.current}
+          viewabilityConfig={viewConfigRef.current}
         />
+
+        <View style={styles.pagination}>
+          {product.images.map((_: any, index: any) => (
+            <View
+              key={index}
+              style={[
+                styles.dot,
+                { backgroundColor: index === currentIndex ? '#4CAF50' : '#ccc' }
+              ]}
+            />
+          ))}
+        </View>
+
 
         <View style={styles.detailsContainer}>
           <View style={styles.priceDiscount}>

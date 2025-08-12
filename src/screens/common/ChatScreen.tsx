@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackParamList } from '../../navigation/StackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -50,19 +51,30 @@ const ChatScreen = () => {
 
   useFocusEffect(
     useCallback(() => {
-      loadConversations();
+      let mounted = true;
+
+      const init = async () => {
+        const storedId = await AsyncStorage.getItem('id');
+        if (storedId && mounted) {
+          connectConversationsSocket(
+            storedId,
+            setConversations,
+            setCurrentUserId
+          );
+        }
+
+        loadConversations();
+      };
+
+      init();
 
       return () => {
+        mounted = false;
         disconnectConversationsSocket();
       };
     }, [])
   );
 
-  useEffect(() => {
-    if (currentUserId) {
-      connectConversationsSocket(currentUserId, (chats: any) => setConversations(chats), (id: any) => setCurrentUserId(id));
-    }
-  }, [currentUserId]);
 
 
   const renderItem = ({ item }: { item: Conversation }) => {

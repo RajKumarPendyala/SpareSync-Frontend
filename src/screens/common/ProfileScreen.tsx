@@ -23,6 +23,7 @@ import {
   logoutUser,
   getUserRole,
 } from '../../services/common/profileService';
+import PrimaryButton from '../../components/primaryButton';
 
 
 type ProfileScreenNavigationProp = StackNavigationProp<StackParamList, 'Profile'>;
@@ -171,7 +172,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
         placeholder="Name"
       />
       <TextInput
-        style={styles.input}
+        style={styles.email}
         editable={false}
         value={profile?.email || ''}
         placeholder="Email"
@@ -223,7 +224,10 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
         placeholder="State"
       />
 
-      <Button title={editable ? 'Save' : 'Edit Profile'} onPress={() => (editable ? handleSave() : setEditable(true))} />
+      <PrimaryButton
+      title={editable ? 'Save' : 'Edit Profile'}
+      onPress={() => (editable ? handleSave() : setEditable(true))}
+      />
 
       <TouchableOpacity style={styles.changePassword}
         onPress={() => navigation.navigate('ChangePassword')}

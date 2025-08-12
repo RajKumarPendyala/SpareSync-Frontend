@@ -72,7 +72,7 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="Terms" component={TermsAndConditionsScreen} options={{ headerShown: false }} />
             <Stack.Screen name="BuyerProductDetails" component={ProductDetailsScreen}  options={{ headerShown: false }}/>
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-            <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+            <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ headerShown: true, title: 'Change Password'}}/>
             <Stack.Screen name="PasswordReset" component={PasswordResetScreen} options={{ headerShown: false }}/>
             <Stack.Screen name="BuyerTabNav" component={BuyerTabNav} options={{ headerShown: false }}  />
             <Stack.Screen name="AdminTabNav" component={AdminTabNav} options={{ headerShown: false }}  />
@@ -80,8 +80,8 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="OrderDetailScreen" component={BuyerOrderDetailScreen} options={{headerShown: false}} />
             <Stack.Screen name="ChatDetail" component={ChatDetailScreen} options={{ headerShown: false }} />
             <Stack.Screen name="ReviewScreen" component={BuyerReviewScreen} options={{ headerShown: true, title: 'Review' }} />
-            <Stack.Screen name="AddProductScreen" component={SellerAddProductScreen} options={{ headerShown: false}}/>
-            <Stack.Screen name="EditProductScreen" component={EditProductScreen} options={{ headerShown: true, title: 'Edit Spare Part'}}/>
+            <Stack.Screen name="AddProductScreen" component={SellerAddProductScreen} options={{ headerShown: true, title: 'Add Product'}}/>
+            <Stack.Screen name="EditProductScreen" component={EditProductScreen} options={{ headerShown: true, title: 'Edit Product'}}/>
             <Stack.Screen name="AlertScreen" component={SellerAlertScreen} options={{ headerShown: true, title: 'Low Stock Products'}}/>
             <Stack.Screen name="UserDetailScreen" component={AdminUserDetailScreen} options={{ headerShown: true, title: 'User Details'}}/>
             <Stack.Screen name="SpareParts"
