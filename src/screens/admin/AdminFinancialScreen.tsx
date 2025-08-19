@@ -28,6 +28,7 @@ const generateYears = (startYear = 2021) => {
 
 const years = generateYears();
 const months = [
+  { label: 'None', value: '0' },
   { label: 'January', value: '1' },
   { label: 'February', value: '2' },
   { label: 'March', value: '3' },
@@ -56,8 +57,7 @@ const AdminFinancialScreen = () => {
       const data = await fetchFinancialReport({ type, year, month });
       setSummary(data);
     } catch (err: any) {
-      console.error('Financial fetch error:', err);
-      Alert.alert('Error', err.message || 'Failed to fetch report');
+      Alert.alert('Fail', err.message || 'Failed to fetch report');
     } finally {
       setLoading(false);
     }

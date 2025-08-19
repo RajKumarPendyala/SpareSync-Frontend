@@ -64,18 +64,6 @@ const styles = StyleSheet.create({
       fontSize: 15,
       color: Colors.black,
     },
-    cancelButton: {
-      marginTop: 10,
-      backgroundColor: Colors.secondary,
-      padding: 12,
-      borderRadius: 10,
-      alignItems: 'center',
-    },
-    cancelText: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: '#fff',
-    },
     centered: {
       flex: 1,
       justifyContent: 'center',

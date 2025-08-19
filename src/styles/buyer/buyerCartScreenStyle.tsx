@@ -116,13 +116,13 @@ const styles = StyleSheet.create({
       marginVertical: 4,
     },
     quantityButton: {
-      backgroundColor: Colors.inputContainerBD,
+      backgroundColor: '#1565C0',
       paddingHorizontal: 8,
       paddingVertical: 3,
       borderRadius: 4,
     },
     disabledButton: {
-      backgroundColor: Colors.primaryButtonBG,
+      backgroundColor: '#C0C0C0',
     },
     buttonText: {
       color: '#fff',

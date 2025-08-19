@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useSpareParts } from '../../context/SparePartsContext';
 import Colors from '../../context/colors';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useProfile } from '../../context/ProfileContext';
 import styles from '../../styles/buyer/buyerCartScreenStyle';
 import {
   fetchCartItems,
@@ -23,6 +24,7 @@ import {
   removeCartItem,
   placeOrder,
 } from '../../services/buyer/buyerCartService';
+import { fetchUserProfile } from '../../services/common/profileService';
 
 
 type RootStackNavigationProp = StackNavigationProp<StackParamList, 'BuyerTabNav'>;
@@ -36,6 +38,8 @@ const BuyerCartScreen: React.FC = () => {
   const [orderPlaceable, setOrderPlaceable] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState('');
+  const { profile, setProfile } = useProfile();
+
 
   const handleDelete = async (item: any) => {
     try {
@@ -51,6 +55,30 @@ const BuyerCartScreen: React.FC = () => {
       Alert.alert('Failed to remove item from cart.');
     }
   };
+
+    useEffect(() => {
+      const loadProfile = async () => {
+        try {
+          const data = await fetchUserProfile();
+          setProfile({
+            ...data.user,
+            image: data.user.image || { path: '' },
+            address: {
+              houseNo: '',
+              street: '',
+              postalCode: '',
+              city: '',
+              state: '',
+              ...data.user.address,
+            },
+          });
+        } catch (error) {
+          Alert.alert('Error', 'Failed to fetch profile.');
+          console.error('Error fetching profile:', error);
+        }
+      };
+      loadProfile();
+    }, [setProfile]);
 
 
   const fetchCart = async () => {
@@ -82,6 +110,25 @@ const BuyerCartScreen: React.FC = () => {
 
 
   const handlePlaceOrder = async () => {
+    if (!isAddressComplete(profile?.address)) {
+      Alert.alert(
+        'Incomplete Address',
+        'Please fill all address fields before placing an order.',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => {},
+          },
+          {
+            text: 'Yes, Go to Profile',
+            onPress: () => navigation.navigate('Profile'),
+          },
+        ]
+      );
+      return;
+    }
+
     if (!orderPlaceable) {
       Alert.alert('Warning', 'One or more products out of stock.');
       setOrderPlaceable(true);
@@ -96,10 +143,19 @@ const BuyerCartScreen: React.FC = () => {
       }
     } catch (error: any) {
       console.log('Error placing order:', error?.response?.data.message || error.message);
-      Alert.alert('Fail', error?.response?.data.message || 'Something went wrong.');
+      Alert.alert('Failed to place order', error?.response?.data.message || 'Something went wrong.');
     }
   };
 
+  const isAddressComplete = (address: any) => {
+    if (!address) {
+        return false;
+    }
+    const requiredFields = ['houseNo', 'street', 'postalCode', 'city', 'state'];
+    return requiredFields.every(
+      (field) => address[field] && address[field].toString().trim() !== ''
+    );
+  };
 
   const renderItem = ({ item }: any) => {
     const part = item.sparePartId;

@@ -16,10 +16,11 @@ export const updateOrderStatus = async (orderId: string, newStatus: string) => {
       }
     );
 
-    return response.status === 200;
+    if (response.status === 200) {
+      return 'success';
+    }
   } catch (error: any) {
-    console.error('Error updating status:', error?.response?.data || error.message);
-    throw new Error('Failed to update order status');
+    return error?.response?.data?.message || error.message;
   }
 };
 

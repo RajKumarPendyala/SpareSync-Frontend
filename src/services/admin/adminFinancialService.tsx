@@ -21,8 +21,10 @@ export const fetchFinancialReport = async ({
   year,
   month,
 }: FetchReportParams): Promise<FinancialSummary> => {
-  if (type === 'monthly' && (!year || !month)) {
-    throw new Error('Please select both year and month.');
+  if (type === 'monthly' && (!year)) {
+    throw new Error('Please select year.');
+  }if (type === 'monthly' && (month === '0' || !month)) {
+    throw new Error('Please select month.');
   }
   if (type === 'yearly' && !year) {
     throw new Error('Please select year.');

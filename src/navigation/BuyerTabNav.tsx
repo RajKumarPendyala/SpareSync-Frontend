@@ -13,7 +13,7 @@ export type BuyerTabParamList = {
   Home: undefined;
   Chat: undefined;
   Cart: undefined;
-  Order: undefined;
+  Orders: undefined;
 };
 
 const Tab = createBottomTabNavigator<BuyerTabParamList>();
@@ -33,7 +33,7 @@ const getTabBarIcon =
       case 'Chat':
         iconName = focused ? 'chat' : 'chat-outline';
         break;
-      case 'Order':
+      case 'Orders':
         iconName = focused ? 'clipboard-text' : 'clipboard-text-outline';
         break;
     }
@@ -59,7 +59,7 @@ const BuyerTabNav: React.FC = () => {
       <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
       <Tab.Screen name="Cart" component={CartScreen} options={{ headerShown: false }}/>
       <Tab.Screen name="Chat" component={ChatScreen} options={{ headerShown: false }}/>
-      <Tab.Screen name="Order" component={OrderScreen} options={{ headerShown: false }}/>
+      <Tab.Screen name="Orders" component={OrderScreen} options={{ headerShown: false }}/>
     </Tab.Navigator>
 
   );

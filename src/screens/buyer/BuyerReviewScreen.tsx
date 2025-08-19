@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   ScrollView,
   Image,
   Alert,
@@ -17,6 +16,7 @@ import Colors from '../../context/colors';
 import pickAndUploadImage from '../../utils/pickAndUploadImage';
 import styles from '../../styles/buyer/buyerReviewScreenStyle';
 import { submitReview } from '../../services/buyer/buyerReviewService';
+import PrimaryButton from '../../components/primaryButton';
 
 type RootStackNavigationProp = StackNavigationProp<StackParamList, 'BuyerTabNav'>;
 
@@ -92,7 +92,7 @@ const BuyerReviewScreen = () => {
         </TouchableOpacity>
       </ScrollView>
 
-      <Button
+      <PrimaryButton
         title={submitting ? 'Submitting...' : 'Submit Review'}
         onPress={handleSubmit}
         disabled={submitting || !rating || !comment}

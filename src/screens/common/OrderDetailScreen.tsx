@@ -14,6 +14,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import Colors from '../../context/colors';
 import styles from '../../styles/common/orderDetailScreenStyle';
 import { updateOrderStatus, cancelOrder } from '../../services/common/orderDetailService';
+import SecondaryButton from '../../components/secondaryButton';
 
 
 type RootStackNavigationProp = StackNavigationProp<StackParamList, 'BuyerTabNav'>;
@@ -99,19 +100,17 @@ const OrderDetailScreen = () => {
   };
 
   const handleStatusUpdate = async (newStatus: string) => {
-    if (orderObject.shipmentStatus === 'cancelled') {
+    if (orderObject.shipmentStatus === 'cancelled' || orderObject.shipmentStatus === 'delivered') {
       return;
     }
-
-    try {
-      const success = await updateOrderStatus(orderObject._id, newStatus);
-      if (success) {
+      const result = await updateOrderStatus(orderObject._id, newStatus);
+      if (result === 'success') {
         setOrderObject((prev: any) => ({ ...prev, shipmentStatus: newStatus }));
         setSelectedStatus(newStatus);
         Alert.alert('Success', `Order status updated to ${newStatus}`);
       }
-    } catch (error) {
-      Alert.alert('Failed to update status');
+      else {
+      Alert.alert('Failed to change status', result || 'Something went wrong while changing status');
     }
   };
 
@@ -284,15 +283,16 @@ const OrderDetailScreen = () => {
         role !== 'admin' ?
         (
           <View style={styles.summary}>
-            <TouchableOpacity style={styles.cancelButton}
-            onPress={() => handleCancelOrder()}
-            >
-                <Text style={styles.cancelText}>
-                    {
-                        ['shipped', 'delivered', 'cancelled'].includes(orderObject.shipmentStatus) ? 'Cannot Cancel Order' : 'Cancel Order'
-                    }
-                </Text>
-            </TouchableOpacity>
+            <SecondaryButton
+              title={
+                ['shipped', 'delivered', 'cancelled'].includes(orderObject.shipmentStatus)
+                  ? 'Cannot Cancel Order'
+                  : 'Cancel Order'
+              }
+              onPress={handleCancelOrder}
+              borderRadius={10}
+              disabled={['shipped', 'delivered', 'cancelled'].includes(orderObject.shipmentStatus)}
+            />
           </View>
         )
         : ('')
