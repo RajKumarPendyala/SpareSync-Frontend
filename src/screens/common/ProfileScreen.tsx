@@ -58,7 +58,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
         });
       } catch (error) {
         Alert.alert('Error', 'Failed to fetch profile.');
-        console.error('Error fetching profile:', error);
+        console.log('Error fetching profile:', error);
       }
     };
 
@@ -108,7 +108,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
       setEditable(false);
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to update profile.');
-      console.error('Profile update error:', error);
+      console.log('Profile update error:', error);
     }
   };
 

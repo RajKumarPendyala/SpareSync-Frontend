@@ -83,7 +83,7 @@ export const addSparePart = async (sparePart: SparePartPayload) => {
       return { success: false, message: 'Creation failed' };
     }
   } catch (error: any) {
-    console.error('Add Product Error:', error?.response?.data || error.message);
+    console.log('Add Product Error:', error?.response?.data || error.message);
     return { success: false, message: 'Creation failed' };
   }
 };

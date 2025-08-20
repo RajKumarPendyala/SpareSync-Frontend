@@ -47,7 +47,7 @@ const AdminUsersScreen = () => {
       const fetchedUsers = await fetchUsersByRole(role);
       setUsers(fetchedUsers);
     } catch (error) {
-      console.error('Failed to fetch users', error);
+      Alert.alert('Error', 'Failed to fetch users.');
     } finally {
       setLoading(false);
     }

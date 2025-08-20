@@ -52,7 +52,7 @@ const SparePartsScreen: React.FC = () => {
         Alert.alert('Item added to cart successfully!');
       }
     } catch (error: any) {
-      console.error('Error adding to cart:', error?.response?.data || error.message);
+      console.log('Error adding to cart:', error?.response?.data || error.message);
       Alert.alert('Failed to add item to cart.');
     }
   };

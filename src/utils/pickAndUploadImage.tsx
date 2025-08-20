@@ -40,11 +40,11 @@ const pickAndUploadImage = async (): Promise<string | null> => {
       console.log('Cloudinary URL:', json.secure_url);
       return json.secure_url;
     } else {
-      console.error('Cloudinary upload error:', json);
+      console.log('Cloudinary upload error:', json);
       return null;
     }
   } catch (err) {
-    console.error('Upload failed', err);
+    console.log('Upload failed', err);
     return null;
   }
 };

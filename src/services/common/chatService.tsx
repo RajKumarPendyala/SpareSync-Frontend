@@ -17,7 +17,7 @@ export const fetchConversations = async () => {
       userId: response.data.userId,
     };
   } catch (error: any) {
-    console.error('Error fetching conversations:', error?.response?.data || error.message);
+    console.log('Error fetching conversations:', error?.response?.data || error.message);
     throw new Error('Failed to fetch conversations');
   }
 };

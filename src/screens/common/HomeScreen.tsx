@@ -59,7 +59,7 @@ const HomeScreen: React.FC = () => {
         });
 
       } catch (error) {
-        console.error(error);
+        console.log(error);
       }
     };
     fetchSpareParts();
@@ -112,33 +112,34 @@ const HomeScreen: React.FC = () => {
 
 
   return (
-    <View style={styles.container}>
+    <View style={role === 'admin' ? styles.container2 : styles.container}>
 
       {
         role === 'admin' ?
         ('') :
         (
-          <View style={styles.header}>
-            <Text style={styles.logo}>PartNest</Text>
-            {
-              role === 'seller' ?
-              (
-                <TouchableOpacity style={styles.menuButton} onPress={() => {navigation.navigate('AlertScreen', { roleName : role});}}>
-                  <Icon name="alert-circle" size={33} color={Colors.black} />
-                </TouchableOpacity>
-              )
-              :
-              (
-                <TouchableOpacity style={styles.menuButton} onPress={() => {setShowMenu(true);}}>
-                  <Icon name="account-circle" size={33} color={Colors.black} />
-                </TouchableOpacity>
-              )
-            }
-          </View>
+          <>
+            <View style={styles.header}>
+              <Text style={styles.logo}>PartNest</Text>
+              {
+                role === 'seller' ?
+                (
+                  <TouchableOpacity style={styles.menuButton} onPress={() => {navigation.navigate('AlertScreen', { roleName : role});}}>
+                    <Icon name="alert-circle" size={33} color={Colors.black} />
+                  </TouchableOpacity>
+                )
+                :
+                (
+                  <TouchableOpacity style={styles.menuButton} onPress={() => {setShowMenu(true);}}>
+                    <Icon name="account-circle" size={33} color={Colors.black} />
+                  </TouchableOpacity>
+                )
+              }
+            </View>
+            <View style={styles.line}/>
+          </>
         )
       }
-
-      <View style={styles.line}/>
 
 
       <Modal visible={showMenu} transparent>
@@ -172,7 +173,7 @@ const HomeScreen: React.FC = () => {
         />
       </View>
 
-      <View style={styles.card3}>
+      <View style={role === 'admin' ? styles.card4 : styles.card3}>
         {
           spareParts && spareParts.length > 0 ? (
             <FlatList

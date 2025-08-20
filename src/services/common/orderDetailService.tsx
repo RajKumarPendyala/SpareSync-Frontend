@@ -40,7 +40,7 @@ export const cancelOrder = async (orderId: string) => {
 
     return response.status === 200;
   } catch (error: any) {
-    console.error('Error canceling order:', error?.response?.data || error.message);
+    console.log('Error canceling order:', error?.response?.data || error.message);
     throw new Error('Failed to cancel order');
   }
 };

@@ -26,7 +26,7 @@ export const fetchSparePartsService = async () => {
       sparePart: response.data.SpareParts || [],
     };
   } catch (error: any) {
-    console.error('Error fetching spare parts:', error?.response?.data || error.message);
+    console.log('Error fetching spare parts:', error?.response?.data || error.message);
     throw new Error('Failed to fetch spare parts');
   }
 };
@@ -46,7 +46,7 @@ export const addToCartService = async (sparePartId: string) => {
 
     return response.data.message;
   } catch (error: any) {
-    console.error('Error adding to cart:', error?.response?.data || error.message);
+    console.log('Error adding to cart:', error?.response?.data || error.message);
     throw new Error('Failed to add item to cart');
   }
 };

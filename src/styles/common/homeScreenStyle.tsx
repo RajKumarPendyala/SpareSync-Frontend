@@ -21,6 +21,10 @@ const styles = StyleSheet.create({
       backgroundColor: Colors.background,
       paddingTop: 20,
     },
+    container2: {
+      flex: 1,
+      backgroundColor: Colors.background,
+    },
     header: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -84,6 +88,9 @@ const styles = StyleSheet.create({
     },
     card3: {
       paddingBottom: 375,
+    },
+    card4: {
+      paddingBottom: 320,
     },
     image: {
       width: width * 0.25,

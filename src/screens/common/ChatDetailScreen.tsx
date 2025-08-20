@@ -47,7 +47,7 @@ const ChatDetailScreen = () => {
       setOtherParticipant(data.conversation.participants.find((p: any) => p._id !== data.currentUser));
 
     } catch (error: any) {
-      console.error('Failed to fetch conversation:', error?.response?.data || error.message);
+      console.log('Failed to fetch conversation:', error?.response?.data || error.message);
       Alert.alert('Error loading chat');
     }
   };
@@ -94,7 +94,7 @@ const ChatDetailScreen = () => {
                 Alert.alert('Success','Conversation deleted successfully!');
               }
             } catch (error: any) {
-              console.error('Error removing conversation:', error?.response?.data || error.message);
+              console.log('Error removing conversation:', error?.response?.data || error.message);
               Alert.alert('Failed to remove conversation.');
             }
           },
@@ -117,7 +117,7 @@ const ChatDetailScreen = () => {
       setMessage('');
       flatListRef.current?.scrollToEnd({ animated: true });
     } catch (error: any) {
-      console.error('Send message failed:', error?.response?.data || error.message);
+      console.log('Send message failed:', error?.response?.data || error.message);
       Alert.alert('Failed to send message');
     }
   };

@@ -72,7 +72,7 @@ export const updateSparePart = async (sparePart: SparePartData) => {
       return { success: false, message: 'Update failed' };
     }
   } catch (error: any) {
-    console.error('Update error:', error?.response?.data || error.message);
+    console.log('Update error:', error?.response?.data || error.message);
     return { success: false, message: 'Update failed' };
   }
 };

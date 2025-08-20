@@ -70,7 +70,7 @@ const ProductDetailsScreen: React.FC<Props> = ({ route }) => {
         conversationId: data.conversation._id,
       });
     } catch (error: any) {
-      console.error('Send message failed:', error?.response?.data || error.message);
+      console.log('Send message failed:', error?.response?.data || error.message);
       Alert.alert('Fail', 'Failed to enable chat option');
     }
   };
@@ -82,7 +82,7 @@ const ProductDetailsScreen: React.FC<Props> = ({ route }) => {
         Alert.alert('Item added to cart successfully!');
       }
     } catch (error: any) {
-      console.error('Error adding to cart:', error?.response?.data || error.message);
+      console.log('Error adding to cart:', error?.response?.data || error.message);
       Alert.alert('Failed to add item to cart.');
     }
   };
@@ -104,7 +104,7 @@ const ProductDetailsScreen: React.FC<Props> = ({ route }) => {
               Alert.alert('Success', 'Product deleted successfully');
               navigation.goBack();
             } catch (error: any) {
-              console.error('Error deleting product:', error?.response?.data || error.message);
+              console.log('Error deleting product:', error?.response?.data || error.message);
               Alert.alert('Failed to delete product.');
             }
           },

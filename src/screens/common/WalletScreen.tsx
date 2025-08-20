@@ -53,7 +53,7 @@ const WalletScreen = () => {
         });
       } catch (error) {
         Alert.alert('Error', 'Failed to fetch balance.');
-        console.error('Error fetching balance:', error);
+        console.log('Error fetching balance:', error);
       }
     };
 

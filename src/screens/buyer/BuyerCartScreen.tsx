@@ -51,7 +51,7 @@ const BuyerCartScreen: React.FC = () => {
         Alert.alert('Success', 'Item removed from cart successfully!');
       }
     } catch (error: any) {
-      console.error('Error removing item from cart:', error?.response?.data || error.message);
+      console.log('Error removing item from cart:', error?.response?.data || error.message);
       Alert.alert('Failed to remove item from cart.');
     }
   };
@@ -74,7 +74,7 @@ const BuyerCartScreen: React.FC = () => {
           });
         } catch (error) {
           Alert.alert('Error', 'Failed to fetch profile.');
-          console.error('Error fetching profile:', error);
+          console.log('Error fetching profile:', error);
         }
       };
       loadProfile();
@@ -103,7 +103,7 @@ const BuyerCartScreen: React.FC = () => {
       await updateCartItemQuantity(item.sparePartId._id, newQuantity);
       await fetchCart();
     } catch (error: any) {
-      console.error('Error updating quantity:', error?.response?.data || error.message);
+      console.log('Error updating quantity:', error?.response?.data || error.message);
       Alert.alert('Failed to update quantity.');
     }
   };

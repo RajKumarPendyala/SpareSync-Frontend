@@ -24,7 +24,7 @@ export const fetchOrdersService = async (status: string = 'all') => {
       role: role,
     };
   } catch (error: any) {
-    console.error('Error in fetchOrdersService:', error?.response?.data || error.message);
+    console.log('Error in fetchOrdersService:', error?.response?.data || error.message);
     return {
       success: false,
       message: 'Failed to fetch orders',

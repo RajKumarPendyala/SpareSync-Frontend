@@ -56,6 +56,10 @@ const AdminFinancialScreen = () => {
       setLoading(true);
       const data = await fetchFinancialReport({ type, year, month });
       setSummary(data);
+      setYear('');
+      setMonth('');
+      setShowYearDropdown(false);
+      setShowMonthDropdown(false);
     } catch (err: any) {
       Alert.alert('Fail', err.message || 'Failed to fetch report');
     } finally {

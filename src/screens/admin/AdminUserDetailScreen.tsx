@@ -5,7 +5,6 @@ import {
   ScrollView,
   Image,
   Alert,
-  Button,
   ActivityIndicator,
 } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
@@ -14,6 +13,7 @@ import { StackParamList } from '../../navigation/StackNavigator';
 import Colors from '../../context/colors';
 import styles from '../../styles/admin/adminUserDetailScreenStyle';
 import { deleteUserById } from '../../services/admin/adminUserDetailService';
+import SecondaryButton from '../../components/secondaryButton';
 
 type RootStackNavigationProp = StackNavigationProp<StackParamList, 'BuyerTabNav'>;
 
@@ -39,7 +39,6 @@ const AdminUserDetailScreen = () => {
               Alert.alert('Success', message);
               navigation.goBack();
             } catch (err) {
-              console.error('Delete user error:', err);
               Alert.alert('Error', 'Failed to delete user.');
             } finally {
               setLoading(false);
@@ -102,9 +101,9 @@ const AdminUserDetailScreen = () => {
 
 
         <View style={styles.deleteBtn}>
-          <Button
-            title="Delete User"
-            color={Colors.secondary}
+
+          <SecondaryButton
+            title="DELETE USER"
             onPress={handleDelete}
           />
         </View>

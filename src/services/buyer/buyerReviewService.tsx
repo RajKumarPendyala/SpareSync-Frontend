@@ -43,7 +43,7 @@ export const submitReview = async ({
       return { success: false, message: 'Unexpected response from server.' };
     }
   } catch (error: any) {
-    console.error('Submit review error:', error?.response?.data || error.message);
+    console.log('Submit review error:', error?.response?.data || error.message);
     return { success: false, message: 'Failed to submit review.' };
   }
 };
