@@ -14,6 +14,13 @@ const styles = StyleSheet.create({
       alignSelf: 'center',
       color: 'gray',
     },
+    headerText2: {
+      fontSize: 30,
+      fontWeight: 800,
+      marginTop: 200,
+      alignSelf: 'center',
+      color: 'gray',
+    },
     image: {
       width: 150,
       height: 150,

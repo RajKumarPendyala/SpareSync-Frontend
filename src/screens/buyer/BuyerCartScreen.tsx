@@ -39,6 +39,7 @@ const BuyerCartScreen: React.FC = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState('');
   const { profile, setProfile } = useProfile();
+  const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
 
 
   const handleDelete = async (item: any) => {
@@ -100,11 +101,17 @@ const BuyerCartScreen: React.FC = () => {
 
   const updateQuantity = async (item: any, newQuantity: number) => {
     try {
+      if (newQuantity < 1 || newQuantity > 5) {
+        return;
+      }
+      setLoadingItemId(item.sparePartId._id);
       await updateCartItemQuantity(item.sparePartId._id, newQuantity);
       await fetchCart();
     } catch (error: any) {
       console.log('Error updating quantity:', error?.response?.data || error.message);
       Alert.alert('Failed to update quantity.');
+    } finally {
+      setLoadingItemId(null);
     }
   };
 
@@ -227,26 +234,32 @@ const BuyerCartScreen: React.FC = () => {
                 item.quantity <= 1 && styles.disabledButton,
               ]}
             >
-              {
-                loading ? ( <ActivityIndicator size="small" color={Colors.background} /> ) :
-                ( <Text style={styles.buttonText}>-</Text> )
-              }
+              {loadingItemId === item._id ? (
+                <ActivityIndicator size="small" color={Colors.background} />
+              ) : (
+                <Text style={styles.buttonText}>-</Text>
+              )}
             </TouchableOpacity>
 
             <Text style={styles.quantityText}>{item.quantity}</Text>
 
             <TouchableOpacity
               onPress={() => updateQuantity(item, item.quantity + 1)}
-              disabled={item.quantity >= 5 || product.quantity <= item.quantity}
+              disabled={
+                item.quantity >= 5 ||
+                (product && product.quantity <= item.quantity)
+              }
               style={[
                 styles.quantityButton,
-                (item.quantity >= 5 || product.quantity <= item.quantity) && styles.disabledButton,
+                (item.quantity >= 5 ||
+                  (product && product.quantity <= item.quantity)) && styles.disabledButton,
               ]}
             >
-              {
-                loading ? ( <ActivityIndicator size="small" color={Colors.background} /> ) :
-                ( <Text style={styles.buttonText}>+</Text> )
-              }
+              {loadingItemId === item._id ? (
+                <ActivityIndicator size="small" color={Colors.background} />
+              ) : (
+                <Text style={styles.buttonText}>+</Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>

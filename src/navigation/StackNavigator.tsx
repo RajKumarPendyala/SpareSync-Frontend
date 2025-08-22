@@ -35,7 +35,7 @@ export type StackParamList = {
     Terms: undefined;
     PasswordReset: { email: string};
     SpareParts: {gadgetType: string, name: string, roleName: string | null};
-    Wallet: undefined;
+    Wallet: { roleName: string | null};
     Profile: undefined;
     ChangePassword: undefined;
     BuyerProductDetails: { partId: string, roleName: string | null };

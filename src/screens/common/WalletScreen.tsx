@@ -9,6 +9,8 @@ import {
 import styles from '../../styles/common/walletScreenStyles';
 import PrimaryButton from '../../components/primaryButton';
 import SecondaryButton from '../../components/secondaryButton';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { StackParamList } from '../../navigation/StackNavigator';
 import { useProfile } from '../../context/ProfileContext';
 import {
   fetchUserProfile,
@@ -24,6 +26,10 @@ const WalletScreen = () => {
   const [wAmount, setWalletAmount] = useState<number>(0);
   const [inputAmount, setInputAmount] = useState('');
   const { setProfile } = useProfile();
+  const route = useRoute<RouteProp<StackParamList, 'Wallet'>>();
+  const roleName = route.params?.roleName ?? null;
+
+  console.log(roleName);
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -97,7 +103,7 @@ const WalletScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.headerText}>DIGITAL WALLET</Text>
+      <Text style={roleName !== 'seller' ? styles.headerText : styles.headerText2}>DIGITAL WALLET</Text>
       <Image source={require('../../assets/images/wallet.png')} style={styles.image} resizeMode="contain" />
 
       <View style={styles.balanceCard}>
@@ -105,33 +111,37 @@ const WalletScreen = () => {
         <Text style={styles.balanceValue}>₹ {wAmount.toFixed(2)}</Text>
       </View>
 
-      <View style={styles.inputRow}>
-        <TextInput
-          placeholder="Enter amount"
-          keyboardType="numeric"
-          value={inputAmount}
-          onChangeText={setInputAmount}
-          style={styles.input}
-        />
-        <PrimaryButton
-          title="Add"
-          // width={100}
-          onPress={handleAddInputAmount}
-          viewStyle={styles.addButtonStyle}
-        />
-      </View>
+      {roleName !== 'seller' && (
+        <>
+          <View style={styles.inputRow}>
+            <TextInput
+              placeholder="Enter amount"
+              keyboardType="numeric"
+              value={inputAmount}
+              onChangeText={setInputAmount}
+              style={styles.input}
+            />
+            <PrimaryButton
+              title="Add"
+              onPress={handleAddInputAmount}
+              viewStyle={styles.addButtonStyle}
+            />
+          </View>
 
-      <Text style={styles.quickLabel}>Quick Add</Text>
-      <View style={styles.quickGrid}>
-        {quickAmounts.map(amount => (
-          <SecondaryButton
-            key={amount}
-            title={`₹${amount}`}
-            onPress={() => handleQuickAmount(amount)}
-            viewStyle={styles.quickButtonStyle}
-          />
-        ))}
-      </View>
+          <Text style={styles.quickLabel}>Quick Add</Text>
+          <View style={styles.quickGrid}>
+            {quickAmounts.map(amount => (
+              <SecondaryButton
+                key={amount}
+                title={`₹${amount}`}
+                onPress={() => handleQuickAmount(amount)}
+                viewStyle={styles.quickButtonStyle}
+              />
+            ))}
+          </View>
+        </>
+      )}
+
     </View>
   );
 };

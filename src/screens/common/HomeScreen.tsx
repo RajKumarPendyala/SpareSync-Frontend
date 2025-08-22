@@ -148,7 +148,7 @@ const HomeScreen: React.FC = () => {
             <TouchableOpacity onPress={() => { setShowMenu(false); navigation.navigate('Profile'); }}>
               <Text style={styles.dropdownItem}><Icon name="account-circle-outline" size={16} color={Colors.primary} />   Profile</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => { setShowMenu(false); navigation.navigate('Wallet'); }}>
+            <TouchableOpacity onPress={() => { setShowMenu(false); navigation.navigate('Wallet', { roleName: null }); }}>
               <Text style={styles.dropdownItem}><Icon name="wallet-outline" size={16} color={Colors.primary} />   Wallet</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleLogout}>

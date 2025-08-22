@@ -133,7 +133,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
       <Modal visible={showMenu} transparent>
         <TouchableOpacity style={styles.modalOverlay} onPress={() => setShowMenu(false)}>
           <View style={styles.dropdown}>
-            <TouchableOpacity onPress={() => { setShowMenu(false); navigation.navigate('Wallet'); }}>
+            <TouchableOpacity onPress={() => { setShowMenu(false); navigation.navigate('Wallet', { roleName: 'seller' }); }}>
               <Text style={styles.dropdownItem}><Icon name="wallet-outline" size={16} color={Colors.primary} />   Wallet</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleLogout}>
